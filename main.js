@@ -3317,7 +3317,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         })
       }
       if (selectedUnitKeys.size === 0) {
-        selectDefaultOrRandomUnit(true)
+        currentActiveLevelKey = "level1"
       } else {
         const firstUnit = Array.from(selectedUnitKeys)[0]
         const info = getUnitData(firstUnit)
@@ -3362,7 +3362,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } catch {}
       }
       if (!loadedAny) {
-        selectDefaultOrRandomUnit(true)
+        currentActiveLevelKey = savedActiveLevelKey || "level1"
       } else if (savedActiveLevelKey) {
         currentActiveLevelKey = savedActiveLevelKey
       } else {
@@ -4195,29 +4195,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function selectDefaultOrRandomUnit(forceRandom = false) {
-    const levels = getActiveSeriesLevels()
-    const levelKeys = Object.keys(levels).filter((k) => k.startsWith("level"))
-    if (levelKeys.length === 0) return
-
-    const allAvailableKeys = []
-    levelKeys.forEach((lvl) => {
-      const units = levels[lvl]
-      for (const u in units) {
-        const fullKey = activeSeriesId === "smart-phonics" ? `${lvl}|${u}` : `${activeSeriesId}|${lvl}|${u}`
-        allAvailableKeys.push({ fullKey, level: lvl })
-      }
-    })
-
-    if (allAvailableKeys.length === 0) return
-
-    let pick = allAvailableKeys[0]
-    if (forceRandom) {
-      const randomIndex = Math.floor(Math.random() * allAvailableKeys.length)
-      pick = allAvailableKeys[randomIndex]
-    }
-
-    selectedUnitKeys.add(pick.fullKey)
-    currentActiveLevelKey = pick.level
+    // Keep selection empty by default per user specification
     renderWordSelectionUI()
   }
 
@@ -4409,7 +4387,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   function handleSeriesChange(newSeriesId) {
     activeSeriesId = newSeriesId
     selectedUnitKeys.clear()
-    selectDefaultOrRandomUnit(false)
+    currentActiveLevelKey = "level1"
+    renderWordSelectionUI()
     syncUrlParameters()
     saveSettings()
   }
@@ -4662,9 +4641,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Reset game mode to Conquest
     updateGameModeHint("Conquest")
 
-    // Reset word selection
-    selectDefaultOrRandomUnit(true)
+    // Reset word selection (keep empty)
+    selectedUnitKeys.clear()
+    currentActiveLevelKey = "level1"
     renderWordSelectionUI()
+    syncUrlParameters()
 
     // Update the UI
     renderNameInputs()
@@ -4806,7 +4787,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     })
     if (selectedUnitKeys.size === 0) {
-      selectDefaultOrRandomUnit(false)
+      currentActiveLevelKey = "level1"
     } else {
       const firstUnit = Array.from(selectedUnitKeys)[0]
       const info = getUnitData(firstUnit)
@@ -4940,11 +4921,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         const profiles = rawProfiles ? JSON.parse(rawProfiles) : {}
         if (profiles[setName] && Array.isArray(profiles[setName].units) && profiles[setName].units.length > 0) {
           applyUnitsToTicTacToe(profiles[setName].units, profiles[setName].curriculumId)
-        } else {
-          // If profile has no units or current selection is blank, ensure a valid unit is selected
-          if (selectedUnitKeys.size === 0) {
-            selectDefaultOrRandomUnit(true)
-          }
         }
       } catch (e) {
         console.warn("Error applying units for loaded set:", e)
