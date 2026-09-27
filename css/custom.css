@@ -229,6 +229,14 @@ main {
   max-width: calc(100vw - var(--size-6));
 }
 
+#game-setup .actions .button-group {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--size-3);
+}
+
 #game-setup .actions .button {
   border-radius: var(--radius-round);
 }
