@@ -879,6 +879,14 @@ dialog#game-over-dialog {
     color: var(--primary);
   }
 
+  .equal-turns-notice {
+    font-size: var(--fs-step-0);
+    margin-block-start: calc(var(--space-2xs) * -1);
+    margin-block-end: var(--space-s);
+    color: var(--text-2, #64748b);
+    font-weight: var(--font-weight-5, 500);
+  }
+
   .score-list {
     display: grid;
     margin-top: var(--size-4);

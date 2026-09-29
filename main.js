@@ -186,6 +186,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Get Upstash Redis credentials from localStorage, cleaning the URL
   function getUpstashCredentials() {
+    if (window.SharedClassSync?.getCredentials) {
+      const creds = window.SharedClassSync.getCredentials()
+      if (creds && creds.url && creds.token) {
+        let url = creds.url
+        if (url && url.endsWith("/")) url = url.slice(0, -1)
+        return { url, token: creds.token }
+      }
+    }
     let url = localStorage.getItem(UPSTASH_URL_KEY)
     const token = localStorage.getItem(UPSTASH_TOKEN_KEY)
     if (url && url.endsWith("/")) {
@@ -265,10 +273,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Perform full sync (pull database updates and merge/overwrite local storage)
   async function syncWithUpstashOnLoad() {
     const { url, token } = getUpstashCredentials()
-    if (!url || !token) return;
+    const hasCreds = Boolean(url && token)
 
     const statusEl = document.getElementById("sync-status")
-    if (statusEl) {
+    if (hasCreds && statusEl) {
       statusEl.textContent = "Syncing..."
       statusEl.className = "sync-status-msg"
     }
@@ -279,11 +287,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         const { playerSets, classProfiles } = await window.SharedClassSync.loadAllClasses()
         if (typeof populateSetsDialog === "function") populateSetsDialog()
         activeClassMatch = window.SharedClassSync.findActiveScheduledClass(classProfiles)
-      } else {
+      } else if (hasCreds) {
         // 1. Sync sets (Database is source of truth if it exists)
         const dbSets = await fetchFromUpstash(SHARED_SETS_KEY)
-        if (!localStorage.getItem(UPSTASH_URL_KEY)) return
-
         if (dbSets) {
           localStorage.setItem(SHARED_SETS_KEY, JSON.stringify(dbSets))
           if (typeof populateSetsDialog === "function") populateSetsDialog()
@@ -296,43 +302,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
 
-      // Priority 1: Scheduled active class in session right now (unless explicit URL parameters are present)
+      // Priority 1: Scheduled active class in session right now
       const urlParams = new URLSearchParams(window.location.search)
-      const hasExplicitUrlParams = urlParams.has("units") || urlParams.has("series") || urlParams.has("book")
-      if (activeClassMatch && !hasExplicitUrlParams) {
+      const hasExplicitClassOverride = urlParams.has("class") || urlParams.has("set")
+      if (activeClassMatch && !hasExplicitClassOverride) {
         handleLoadSet(activeClassMatch.className, true)
       } else if (!activeClassMatch) {
         // Priority 2: Outside class hours, fall back to active session players
-        const dbActive = await fetchFromUpstash(SHARED_ACTIVE_PLAYERS_KEY)
-        if (!localStorage.getItem(UPSTASH_URL_KEY)) return
-
-        if (dbActive && Array.isArray(dbActive)) {
-          localStorage.setItem(SHARED_ACTIVE_PLAYERS_KEY, JSON.stringify(dbActive))
-          loadSettings()
-          renderNameInputs()
-          validatePlayerNames()
-        } else {
-          const localActiveJSON = localStorage.getItem(SHARED_ACTIVE_PLAYERS_KEY)
-          if (localActiveJSON) {
-            try {
-              const localActive = JSON.parse(localActiveJSON)
-              if (Array.isArray(localActive) && localActive.length > 0) {
-                await syncToUpstash(SHARED_ACTIVE_PLAYERS_KEY, localActive)
-              }
-            } catch (e) {
-              console.error(e)
+        let activePlayers = window.SharedClassSync?.getActivePlayers?.()
+        if (!activePlayers || activePlayers.length === 0) {
+          if (hasCreds) {
+            const dbActive = await fetchFromUpstash(SHARED_ACTIVE_PLAYERS_KEY)
+            if (Array.isArray(dbActive) && dbActive.length > 0) {
+              activePlayers = dbActive
+              localStorage.setItem(SHARED_ACTIVE_PLAYERS_KEY, JSON.stringify(dbActive))
             }
+          }
+        }
+        if (Array.isArray(activePlayers) && activePlayers.length > 0) {
+          const currentNames = gameState.setup.players.map((p) => p.name)
+          const isDifferent =
+            currentNames.length !== activePlayers.length ||
+            currentNames.some((n, i) => n !== activePlayers[i])
+          if (isDifferent) {
+            const newPlayers = activePlayers.map((name, index) => ({
+              id: Date.now() + index,
+              name: name,
+            }))
+            gameState.setup.players = assignRandomColors(newPlayers, false)
+            renderNameInputs()
+            validatePlayerNames()
           }
         }
       }
 
-      if (statusEl) {
+      if (hasCreds && statusEl) {
         statusEl.textContent = "Synced successfully!"
         statusEl.className = "sync-status-msg success"
       }
     } catch (err) {
       console.error("Error running onload sync:", err)
-      if (statusEl) {
+      if (hasCreds && statusEl) {
         statusEl.textContent = "Sync failed."
         statusEl.className = "sync-status-msg error"
       }
@@ -1625,9 +1635,18 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
             }
 
+            const remainingMoves =
+              gameState.gridSize * gameState.gridSize - newMovesMade
+
             if (survivingPlayers.length <= 1) {
               // Either 1 survivor (winner) or 0 survivors (tie among those eliminated this round)
               isGameOver = true
+            } else if (remainingMoves < survivingPlayers.length) {
+              isGameOver = true
+              if (remainingMoves > 0) {
+                gameState = { ...gameState, endedDueToEqualTurns: true }
+                showSnackbar("There are no more equal turns.")
+              }
             } else {
               let nextStarter
               let nextRoundOrder
@@ -1755,15 +1774,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         newMovesMade < gameState.gridSize * gameState.gridSize
 
       if (isGameOver && equalRoundsEnded && hasRemainingMoves) {
+        gameState = { ...gameState, endedDueToEqualTurns: true }
         if (blockPoints > 0) {
           const playerName = gameState.playerNames[gameState.currentPlayer]
           const ptsText = blockPoints === 1 ? "1 pt" : `${blockPoints} pts`
           const lineText = linesBlocked === 1 ? "1 line" : `${linesBlocked} lines`
           showSnackbar(
-            `${playerName} blocked ${lineText}! (+${ptsText}) • No more equal rounds are left.`,
+            `${playerName} blocked ${lineText}! (+${ptsText}) • There are no more equal turns.`,
           )
         } else {
-          showSnackbar("No more equal rounds are left.")
+          showSnackbar("There are no more equal turns.")
         }
       } else if (blockPoints > 0) {
         const playerName = gameState.playerNames[gameState.currentPlayer]
@@ -1829,7 +1849,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         newMovesMade < gameState.gridSize * gameState.gridSize
 
       if (isGameOver && equalRoundsEnded && hasRemainingMoves) {
-        showSnackbar("No more equal rounds are left.")
+        gameState = { ...gameState, endedDueToEqualTurns: true }
+        showSnackbar("There are no more equal turns.")
       }
 
       if (!isGameOver) {
@@ -3573,6 +3594,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         (_, i) => i,
       ),
       stealthTurnIndex: 0,
+      endedDueToEqualTurns: false,
       playerStatsThisGame: Array(gameState.numPlayers)
         .fill(null)
         .map(() => ({
@@ -4527,6 +4549,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     let winnerHTML = `<h3 class="h4 winner-text">${winnerText}</h3>`
+    let equalTurnsHTML = ""
+    if (gameState.endedDueToEqualTurns) {
+      equalTurnsHTML = `<p class="equal-turns-notice">There are no more equal turns.</p>`
+    }
 
     let finalScoresHTML = ""
 
@@ -4588,7 +4614,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       finalScoresHTML = scoreListHTML // Assign the generated HTML to the final variable
     }
 
-    dialogContent.innerHTML = winnerHTML + finalScoresHTML
+    dialogContent.innerHTML = winnerHTML + equalTurnsHTML + finalScoresHTML
 
     setTimeout(() => {
       playSound("gameOver")
@@ -4892,7 +4918,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function handleLoadSet(setName, preferActiveSession = false) {
     const sets = getPlayerSets()
-    const rawNames = sets[setName]
+    let rawNames = sets[setName]
+
+    if (!rawNames && window.SharedClassSync?.getActiveSession) {
+      const session = window.SharedClassSync.getActiveSession()
+      if (session && session.className === setName && Array.isArray(session.players) && session.players.length > 0) {
+        rawNames = session.players
+      }
+    }
 
     if (!rawNames) return
 
@@ -4931,7 +4964,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    playerSetsDialog.close()
+    if (playerSetsDialog?.open) {
+      playerSetsDialog.close()
+    }
     validatePlayerNames()
     saveSettings()
   }
@@ -5242,6 +5277,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadSettings()
   updateApiFieldVisibility()
 
+  // Run class schedule matching and cloud sync
+  await syncWithUpstashOnLoad()
+
   // Upstash Config and Sync UI event listeners
   const upstashUrlInput = document.getElementById("upstash-url")
   const upstashTokenInput = document.getElementById("upstash-token")
@@ -5318,7 +5356,4 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   })
-
-  // Trigger sync on load if credentials exist
-  syncWithUpstashOnLoad()
 })
