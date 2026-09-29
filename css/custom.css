@@ -493,7 +493,21 @@ dialog.manage-books-dialog {
   display: flex;
   flex-direction: column;
   gap: var(--size-4);
-  padding-bottom: 90px;
+  padding-bottom: 0;
+}
+
+.setup-column {
+  display: contents;
+}
+
+@media (max-width: 767px) {
+  .player-setup      { order: 1; }
+  .word-selection    { order: 2; }
+  .game-mode-setup   { order: 3; }
+  .game-rules        { order: 4; }
+  .audio-settings    { order: 5; }
+  .api-settings      { order: 6; }
+  .sync-settings     { order: 7; }
 }
 
 .setup-section {
@@ -505,15 +519,14 @@ dialog.manage-books-dialog {
   overflow: visible;
 }
 
-.content>.setup-section>.h5 {
-  /* Updated selector */
+.setup-section > .h5 {
   border-bottom: 1px solid var(--border-color);
   padding-bottom: var(--size-fluid-1);
   margin-block-end: var(--size-fluid-2);
   text-align: center;
 }
 
-.content>.setup-section:first-of-type>.h5 {
+.setup-section:first-of-type > .h5 {
   margin-block-start: 0;
 }
 
@@ -1623,23 +1636,21 @@ dialog.side-drawer .saved-set-item .button-group {
   #game-setup .content {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-areas:
-      "player words"
-      "mode   rules"
-      "mode   audio"
-      "api    sync";
     gap: var(--size-4);
     align-items: start;
-    padding-bottom: 100px;
+    padding-bottom: 0;
   }
 
-  .player-setup      { grid-area: player; }
-  .word-selection    { grid-area: words; }
-  .game-mode-setup   { grid-area: mode; }
-  .game-rules        { grid-area: rules; }
-  .audio-settings    { grid-area: audio; }
-  .api-settings      { grid-area: api; }
-  .sync-settings     { grid-area: sync; }
+  .setup-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-4);
+    width: 100%;
+  }
+
+  .setup-section {
+    order: initial;
+  }
 
   .game-mode-setup > .h5 {
     text-align: center;

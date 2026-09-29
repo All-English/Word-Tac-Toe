@@ -29,528 +29,531 @@
           <p>Configure your game and start playing!</p>
         </hgroup>
         <div class="content">
-          <div class="setup-section player-setup">
-            <h4 class="h5">
-              Player Setup
-              <button id="manage-sets-btn" class="icon-button small" aria-label="Manage player lists">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                  <polyline points="7 3 7 8 15 8"></polyline>
-                </svg>
-              </button>
-              <button id="show-stats-btn" class="icon-button small" aria-label="Show player stats">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-                  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-                  <path d="M4 22h16" />
-                  <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-                  <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-                  <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-                </svg>
-              </button>
-              <button id="randomizePlayerOrderBtn_setup" class="icon-button small" aria-label="Randomize player order">
-                <svg viewBox="0 0 24 24" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink" fill="currentColor">
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                  <g id="SVGRepo_iconCarrier">
-                    <style type="text/css">
-                      .st0 {
-                        opacity: 0.2;
-                        fill: none;
-                        stroke: #000000;
-                        stroke-width: 5.000000e-02;
-                        stroke-miterlimit: 10;
-                      }
-                    </style>
-                    <g id="Layer_1"></g>
-                    <g id="Layer_2">
-                      <g>
-                        <path
-                          d="M8.7,14.2C8,14.7,7.1,15,6.2,15H4c-0.6,0-1,0.4-1,1s0.4,1,1,1h2.2c1.3,0,2.6-0.4,3.7-1.2c0.4-0.3,0.5-1,0.2-1.4 C9.7,13.9,9.1,13.8,8.7,14.2z">
-                        </path>
-                        <path
-                          d="M13,10.7c0.3,0,0.6-0.1,0.8-0.3C14.5,9.5,15.6,9,16.8,9h0.8l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4c0.2,0.2,0.5,0.3,0.7,0.3 s0.5-0.1,0.7-0.3l2-2c0.1-0.1,0.2-0.2,0.2-0.3c0.1-0.2,0.1-0.5,0-0.8c-0.1-0.1-0.1-0.2-0.2-0.3l-2-2c-0.4-0.4-1-0.4-1.4,0 s-0.4,1,0,1.4L17.6,7h-0.8c-1.8,0-3.4,0.8-4.6,2.1c-0.4,0.4-0.3,1,0.1,1.4C12.5,10.7,12.8,10.7,13,10.7z">
-                        </path>
-                        <path
-                          d="M20.7,15.3l-2-2c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l0.3,0.3h-1.5c-1.6,0-2.9-0.9-3.6-2.3l-1.2-2.4C10.3,8.3,8.2,7,5.9,7H4 C3.4,7,3,7.4,3,8s0.4,1,1,1h1.9c1.6,0,2.9,0.9,3.6,2.3l1.2,2.4c1,2.1,3.1,3.4,5.4,3.4h1.5l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4 c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3l2-2C21.1,16.3,21.1,15.7,20.7,15.3z">
-                        </path>
-                      </g>
-                    </g>
-                  </g>
-                </svg>
-              </button>
-            </h4>
-
-
-            <div id="player-names-container">
-            </div>
-
-            <div class="add-player-container">
-              <button id="addPlayerBtn" class="button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span>Add Player</span>
-              </button>
-            </div>
-
-          </div>
-
-          <div class="setup-section game-rules">
-            <h4 class="h5">
-              Game Rules
-              <button id="randomizeBoardSizeBtn" class="icon-button small" aria-label="Randomize game board size">
-                <svg viewBox="0 0 24 24" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink" fill="currentColor">
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                  <g id="SVGRepo_iconCarrier">
-                    <style type="text/css">
-                      .st0 {
-                        opacity: 0.2;
-                        fill: none;
-                        stroke: #000000;
-                        stroke-width: 5.000000e-02;
-                        stroke-miterlimit: 10;
-                      }
-                    </style>
-                    <g id="Layer_1"></g>
-                    <g id="Layer_2">
-                      <g>
-                        <path
-                          d="M8.7,14.2C8,14.7,7.1,15,6.2,15H4c-0.6,0-1,0.4-1,1s0.4,1,1,1h2.2c1.3,0,2.6-0.4,3.7-1.2c0.4-0.3,0.5-1,0.2-1.4 C9.7,13.9,9.1,13.8,8.7,14.2z">
-                        </path>
-                        <path
-                          d="M13,10.7c0.3,0,0.6-0.1,0.8-0.3C14.5,9.5,15.6,9,16.8,9h0.8l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4c0.2,0.2,0.5,0.3,0.7,0.3 s0.5-0.1,0.7-0.3l2-2c0.1-0.1,0.2-0.2,0.2-0.3c0.1-0.2,0.1-0.5,0-0.8c-0.1-0.1-0.1-0.2-0.2-0.3l-2-2c-0.4-0.4-1-0.4-1.4,0 s-0.4,1,0,1.4L17.6,7h-0.8c-1.8,0-3.4,0.8-4.6,2.1c-0.4,0.4-0.3,1,0.1,1.4C12.5,10.7,12.8,10.7,13,10.7z">
-                        </path>
-                        <path
-                          d="M20.7,15.3l-2-2c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l0.3,0.3h-1.5c-1.6,0-2.9-0.9-3.6-2.3l-1.2-2.4C10.3,8.3,8.2,7,5.9,7H4 C3.4,7,3,7.4,3,8s0.4,1,1,1h1.9c1.6,0,2.9,0.9,3.6,2.3l1.2,2.4c1,2.1,3.1,3.4,5.4,3.4h1.5l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4 c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3l2-2C21.1,16.3,21.1,15.7,20.7,15.3z">
-                        </path>
-                      </g>
-                    </g>
-                  </g>
-                </svg>
-              </button>
-            </h4>
-            <div class="range-container">
-              <label class="range">
-                <div class="range-label-container">
-                  <span class="label">Board Size: </span><span id="gridSizeValue">5x5</span>
-                </div>
-                <input type="range" id="gridSize" min="3" max="10" value="5">
-              </label>
-            </div>
-            <div class="range-container">
-              <label class="range">
-                <div class="range-label-container">
-                  <span class="label">Words in a Row: </span><span id="matchLengthValue">3</span>
-                </div>
-                <input type="range" id="matchLength" min="2" max="5" value="3">
-              </label>
-            </div>
-            <p class="field-hint">
-              The number of words in a row to score a point.
-              <span class="tooltip-container inline-tooltip">
-                <button type="button" class="icon-button small tooltip-trigger" aria-label="Words in a Row Korean Info" aria-describedby="match-length-tooltip-ko">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+          <div class="setup-column setup-col-left">
+            <div class="setup-section player-setup">
+              <h4 class="h5">
+                Player Setup
+                <button id="manage-sets-btn" class="icon-button small" aria-label="Manage player lists">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
                   </svg>
                 </button>
-                <span id="match-length-tooltip-ko" class="tooltip-popup" role="tooltip">
-                  점수를 획득하기 위해 한 줄로 이어야 하는 단어 수입니다.
+                <button id="show-stats-btn" class="icon-button small" aria-label="Show player stats">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                    <path d="M4 22h16" />
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                  </svg>
+                </button>
+                <button id="randomizePlayerOrderBtn_setup" class="icon-button small" aria-label="Randomize player order">
+                  <svg viewBox="0 0 24 24" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="currentColor">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <style type="text/css">
+                        .st0 {
+                          opacity: 0.2;
+                          fill: none;
+                          stroke: #000000;
+                          stroke-width: 5.000000e-02;
+                          stroke-miterlimit: 10;
+                        }
+                      </style>
+                      <g id="Layer_1"></g>
+                      <g id="Layer_2">
+                        <g>
+                          <path
+                            d="M8.7,14.2C8,14.7,7.1,15,6.2,15H4c-0.6,0-1,0.4-1,1s0.4,1,1,1h2.2c1.3,0,2.6-0.4,3.7-1.2c0.4-0.3,0.5-1,0.2-1.4 C9.7,13.9,9.1,13.8,8.7,14.2z">
+                          </path>
+                          <path
+                            d="M13,10.7c0.3,0,0.6-0.1,0.8-0.3C14.5,9.5,15.6,9,16.8,9h0.8l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4c0.2,0.2,0.5,0.3,0.7,0.3 s0.5-0.1,0.7-0.3l2-2c0.1-0.1,0.2-0.2,0.2-0.3c0.1-0.2,0.1-0.5,0-0.8c-0.1-0.1-0.1-0.2-0.2-0.3l-2-2c-0.4-0.4-1-0.4-1.4,0 s-0.4,1,0,1.4L17.6,7h-0.8c-1.8,0-3.4,0.8-4.6,2.1c-0.4,0.4-0.3,1,0.1,1.4C12.5,10.7,12.8,10.7,13,10.7z">
+                          </path>
+                          <path
+                            d="M20.7,15.3l-2-2c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l0.3,0.3h-1.5c-1.6,0-2.9-0.9-3.6-2.3l-1.2-2.4C10.3,8.3,8.2,7,5.9,7H4 C3.4,7,3,7.4,3,8s0.4,1,1,1h1.9c1.6,0,2.9,0.9,3.6,2.3l1.2,2.4c1,2.1,3.1,3.4,5.4,3.4h1.5l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4 c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3l2-2C21.1,16.3,21.1,15.7,20.7,15.3z">
+                          </path>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                </button>
+              </h4>
+
+
+              <div id="player-names-container">
+              </div>
+
+              <div class="add-player-container">
+                <button id="addPlayerBtn" class="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Add Player</span>
+                </button>
+              </div>
+
+            </div>
+
+            <div class="setup-section game-mode-setup">
+              <h4 class="h5">
+                Game Mode
+                <button id="randomizeGameModeBtn" class="icon-button small" aria-label="Randomize game mode">
+                  <svg viewBox="0 0 24 24" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="currentColor">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <style type="text/css">
+                        .st0 {
+                          opacity: 0.2;
+                          fill: none;
+                          stroke: #000000;
+                          stroke-width: 5.000000e-02;
+                          stroke-miterlimit: 10;
+                        }
+                      </style>
+                      <g id="Layer_1"></g>
+                      <g id="Layer_2">
+                        <g>
+                          <path
+                            d="M8.7,14.2C8,14.7,7.1,15,6.2,15H4c-0.6,0-1,0.4-1,1s0.4,1,1,1h2.2c1.3,0,2.6-0.4,3.7-1.2c0.4-0.3,0.5-1,0.2-1.4 C9.7,13.9,9.1,13.8,8.7,14.2z">
+                          </path>
+                          <path
+                            d="M13,10.7c0.3,0,0.6-0.1,0.8-0.3C14.5,9.5,15.6,9,16.8,9h0.8l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4c0.2,0.2,0.5,0.3,0.7,0.3 s0.5-0.1,0.7-0.3l2-2c0.1-0.1,0.2-0.2,0.2-0.3c0.1-0.2,0.1-0.5,0-0.8c-0.1-0.1-0.1-0.2-0.2-0.3l-2-2c-0.4-0.4-1-0.4-1.4,0 s-0.4,1,0,1.4L17.6,7h-0.8c-1.8,0-3.4,0.8-4.6,2.1c-0.4,0.4-0.3,1,0.1,1.4C12.5,10.7,12.8,10.7,13,10.7z">
+                          </path>
+                          <path
+                            d="M20.7,15.3l-2-2c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l0.3,0.3h-1.5c-1.6,0-2.9-0.9-3.6-2.3l-1.2-2.4C10.3,8.3,8.2,7,5.9,7H4 C3.4,7,3,7.4,3,8s0.4,1,1,1h1.9c1.6,0,2.9,0.9,3.6,2.3l1.2,2.4c1,2.1,3.1,3.4,5.4,3.4h1.5l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4 c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3l2-2C21.1,16.3,21.1,15.7,20.7,15.3z">
+                          </path>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                </button>
+              </h4>
+              <div class="game-mode-grid" id="gameModeSelector" role="radiogroup" aria-label="Game Mode">
+                <button type="button" role="radio" data-mode="Conquest" aria-checked="true" class="selected">
+                  <span>Conquest</span>
+                </button>
+                <button type="button" role="radio" data-mode="Stealth" aria-checked="false">
+                  <span>Stealth</span>
+                </button>
+                <button type="button" role="radio" data-mode="Classic" aria-checked="false">
+                  <span>Classic</span>
+                </button>
+                <button type="button" role="radio" data-mode="Survivor" aria-checked="false">
+                  <span>Survivor</span>
+                </button>
+              </div>
+              <div class="game-mode-hint-wrapper">
+                <p class="field-hint" id="gameModeHint">Get the most points.</p>
+                <div class="tooltip-container">
+                  <button type="button" class="icon-button small tooltip-trigger" aria-label="Game Mode Korean Info" aria-describedby="game-mode-tooltip-ko">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+                    </svg>
+                  </button>
+                  <div id="game-mode-tooltip-ko" class="tooltip-popup" role="tooltip">
+                    가장 많은 점수를 획득하세요.
+                  </div>
+                </div>
+              </div>
+              <div id="modeRulesPanel" class="mode-rules-panel">
+                <div class="panel-inner">
+                  <div id="conquestOptionsGroup" class="setting-group conquest-options">
+                <div class="option-row">
+                  <label class="switch">
+                    <input type="checkbox" role="switch" id="conquestRotatingStarterToggle">
+                    <span class="label">Rotating Starters</span>
+                  </label>
+                  <div class="tooltip-group">
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Info" aria-describedby="conquest-starter-tooltip">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="16" x2="12" y2="12"></line>
+                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                      </button>
+                      <div id="conquest-starter-tooltip" class="tooltip-popup" role="tooltip">
+                        Rotates which player moves first at the start of each round to balance opening tempo.
+                      </div>
+                    </div>
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Korean Info" aria-describedby="conquest-starter-tooltip-ko">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+                        </svg>
+                      </button>
+                      <div id="conquest-starter-tooltip-ko" class="tooltip-popup" role="tooltip">
+                        매 라운드마다 선공 플레이어를 교대하여 첫 번째 턴의 유리함을 조절합니다.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="option-row">
+                  <label class="switch">
+                    <input type="checkbox" role="switch" id="conquestEqualRoundsToggle">
+                    <span class="label">Equal Rounds</span>
+                  </label>
+                  <div class="tooltip-group">
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Info" aria-describedby="conquest-rounds-tooltip">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="16" x2="12" y2="12"></line>
+                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                      </button>
+                      <div id="conquest-rounds-tooltip" class="tooltip-popup" role="tooltip">
+                        Ends the match once all players have taken an equal number of turns so no player gets an extra move on odd grids.
+                      </div>
+                    </div>
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Korean Info" aria-describedby="conquest-rounds-tooltip-ko">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+                        </svg>
+                      </button>
+                      <div id="conquest-rounds-tooltip-ko" class="tooltip-popup" role="tooltip">
+                        모든 플레이어가 동일한 횟수의 턴을 마친 후 경기를 종료하여, 홀수 칸 그리드에서 특정 플레이어가 추가 턴을 갖지 않도록 합니다.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="option-row">
+                  <label class="switch">
+                    <input type="checkbox" role="switch" id="conquestBlockPointsToggle" checked>
+                    <span class="label">Points for Blocks</span>
+                  </label>
+                  <div class="tooltip-group">
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Points for Blocks Info" aria-describedby="conquest-block-tooltip">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="16" x2="12" y2="12"></line>
+                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                      </button>
+                      <div id="conquest-block-tooltip" class="tooltip-popup" role="tooltip">
+                        Earn 0.5 points for each opponent scoring line blocked by your move (when not scoring a point).
+                      </div>
+                    </div>
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Points for Blocks Korean Info" aria-describedby="conquest-block-tooltip-ko">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+                        </svg>
+                      </button>
+                      <div id="conquest-block-tooltip-ko" class="tooltip-popup" role="tooltip">
+                        자신의 턴에 점수를 내지 않더라도, 상대방의 득점 라인을 방어(블록)할 때마다 0.5점을 획득합니다.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="stealthOptionsGroup" class="setting-group stealth-options hidden">
+                <div class="option-row">
+                  <label class="switch">
+                    <input type="checkbox" role="switch" id="stealthRotatingStarterToggle">
+                    <span class="label">Rotating Starters</span>
+                  </label>
+                  <div class="tooltip-group">
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Info" aria-describedby="stealth-starter-tooltip">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="16" x2="12" y2="12"></line>
+                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                      </button>
+                      <div id="stealth-starter-tooltip" class="tooltip-popup" role="tooltip">
+                        Rotates which player moves first at the start of each round to balance opening tempo.
+                      </div>
+                    </div>
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Korean Info" aria-describedby="stealth-starter-tooltip-ko">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+                        </svg>
+                      </button>
+                      <div id="stealth-starter-tooltip-ko" class="tooltip-popup" role="tooltip">
+                        매 라운드마다 선공 플레이어를 교대하여 첫 번째 턴의 유리함을 조절합니다.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="option-row">
+                  <label class="switch">
+                    <input type="checkbox" role="switch" id="stealthEqualRoundsToggle">
+                    <span class="label">Equal Rounds</span>
+                  </label>
+                  <div class="tooltip-group">
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Info" aria-describedby="stealth-rounds-tooltip">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="16" x2="12" y2="12"></line>
+                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                      </button>
+                      <div id="stealth-rounds-tooltip" class="tooltip-popup" role="tooltip">
+                        Ends the match once all players have taken an equal number of turns so no player is forced to take an extra turn.
+                      </div>
+                    </div>
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Korean Info" aria-describedby="stealth-rounds-tooltip-ko">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+                        </svg>
+                      </button>
+                      <div id="stealth-rounds-tooltip-ko" class="tooltip-popup" role="tooltip">
+                        모든 플레이어가 동일한 횟수의 턴을 마친 후 경기를 종료하여, 특정 플레이어가 불필요하게 추가 턴을 하지 않도록 합니다.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="survivorOptionsGroup" class="setting-group survivor-options hidden">
+                <div class="option-row">
+                  <label class="switch">
+                    <input type="checkbox" role="switch" id="survivorRotatingStarterToggle">
+                    <span class="label">Rotating Starters</span>
+                  </label>
+                  <div class="tooltip-group">
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Info" aria-describedby="survivor-starter-tooltip">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="16" x2="12" y2="12"></line>
+                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                      </button>
+                      <div id="survivor-starter-tooltip" class="tooltip-popup" role="tooltip">
+                        Rotates who starts each round among surviving players so the last player doesn't have an unfair advantage.
+                      </div>
+                    </div>
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Korean Info" aria-describedby="survivor-starter-tooltip-ko">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+                        </svg>
+                      </button>
+                      <div id="survivor-starter-tooltip-ko" class="tooltip-popup" role="tooltip">
+                        마지막 플레이어에게 불리하지 않도록, 살아남은 플레이어들 사이에서 매 라운드 선공을 번갈아 변경합니다.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="option-row">
+                  <label class="switch">
+                    <input type="checkbox" role="switch" id="survivorEqualRoundsToggle">
+                    <span class="label">Equal Rounds</span>
+                  </label>
+                  <div class="tooltip-group">
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Info" aria-describedby="survivor-equal-rounds-tooltip">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="16" x2="12" y2="12"></line>
+                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                      </button>
+                      <div id="survivor-equal-rounds-tooltip" class="tooltip-popup" role="tooltip">
+                        Ensures all players get equal turns per round. When a player is eliminated, the round is completed so nobody is eliminated with fewer turns.
+                      </div>
+                    </div>
+                    <div class="tooltip-container">
+                      <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Korean Info" aria-describedby="survivor-equal-rounds-tooltip-ko">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+                        </svg>
+                      </button>
+                      <div id="survivor-equal-rounds-tooltip-ko" class="tooltip-popup" role="tooltip">
+                        모든 플레이어가 라운드당 동일한 턴을 갖도록 합니다. 탈락자가 발생해도 해당 라운드를 끝까지 마쳐 더 적은 턴으로 탈락하지 않도록 보장합니다.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="setup-section api-settings" id="api-settings-section">
+              <h4 class="h5">API Settings</h4>
+              <label class="field" id="api-key-field">
+                <span class="label">ElevenLabs API Key</span>
+                <input type="password" id="elevenlabs-api-key" name="elevenlabs-api-key" autocomplete="off"
+                  placeholder="Paste your key here...">
+              </label>
+              <div class="api-actions">
+                <button id="save-api-key-btn" class="button outlined small">Save & Verify</button>
+                <span id="api-key-status" class="api-status-msg"></span>
+              </div>
+              <p class="field-hint">(Optional) An ElevenLabs API key is needed for a high quality voice. <br> Your key is
+                stored
+                securely in your browser and never leaves your computer.</p>
+            </div>
+          </div>
+
+          <div class="setup-column setup-col-right">
+            <div class="setup-section word-selection">
+              <h4 class="h5">
+                Word Selection
+                <button type="button" id="reset-units-btn" class="icon-button small" aria-label="Reset all units" title="Reset all units">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>
+                </button>
+                <button type="button" id="manage-books-btn" class="icon-button small" aria-label="Manage textbook series visibility" title="Manage Books" style="display: none;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                  </svg>
+                </button>
+              </h4>
+              <div class="word-selection-container">
+                <label class="field book-selection-field" id="book-select-field" style="display: none; width: 100%; max-width: 320px; margin-bottom: 0.5rem;">
+                  <span class="label">Textbook Series</span>
+                  <select id="book-select" class="book-select"></select>
+                </label>
+
+                <!-- Level Tabs Navigation -->
+                <div id="unit-level-tabs" class="unit-level-tabs" role="tablist" aria-label="Textbook Levels">
+                </div>
+
+                <!-- Active Level Toolbar -->
+                <div id="active-level-toolbar" class="active-level-toolbar">
+                  <button type="button" id="toggle-level-all-btn" class="button outlined small toggle-level-all-btn">Select All</button>
+                </div>
+
+                <!-- Unit Chips Grid -->
+                <div id="unit-chips-grid" class="unit-chips-grid" role="group" aria-label="Unit Selection">
+                </div>
+              </div>
+            </div>
+
+            <div class="setup-section game-rules">
+              <h4 class="h5">
+                Game Rules
+                <button id="randomizeBoardSizeBtn" class="icon-button small" aria-label="Randomize game board size">
+                  <svg viewBox="0 0 24 24" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="currentColor">
+                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <style type="text/css">
+                        .st0 {
+                          opacity: 0.2;
+                          fill: none;
+                          stroke: #000000;
+                          stroke-width: 5.000000e-02;
+                          stroke-miterlimit: 10;
+                        }
+                      </style>
+                      <g id="Layer_1"></g>
+                      <g id="Layer_2">
+                        <g>
+                          <path
+                            d="M8.7,14.2C8,14.7,7.1,15,6.2,15H4c-0.6,0-1,0.4-1,1s0.4,1,1,1h2.2c1.3,0,2.6-0.4,3.7-1.2c0.4-0.3,0.5-1,0.2-1.4 C9.7,13.9,9.1,13.8,8.7,14.2z">
+                          </path>
+                          <path
+                            d="M13,10.7c0.3,0,0.6-0.1,0.8-0.3C14.5,9.5,15.6,9,16.8,9h0.8l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4c0.2,0.2,0.5,0.3,0.7,0.3 s0.5-0.1,0.7-0.3l2-2c0.1-0.1,0.2-0.2,0.2-0.3c0.1-0.2,0.1-0.5,0-0.8c-0.1-0.1-0.1-0.2-0.2-0.3l-2-2c-0.4-0.4-1-0.4-1.4,0 s-0.4,1,0,1.4L17.6,7h-0.8c-1.8,0-3.4,0.8-4.6,2.1c-0.4,0.4-0.3,1,0.1,1.4C12.5,10.7,12.8,10.7,13,10.7z">
+                          </path>
+                          <path
+                            d="M20.7,15.3l-2-2c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l0.3,0.3h-1.5c-1.6,0-2.9-0.9-3.6-2.3l-1.2-2.4C10.3,8.3,8.2,7,5.9,7H4 C3.4,7,3,7.4,3,8s0.4,1,1,1h1.9c1.6,0,2.9,0.9,3.6,2.3l1.2,2.4c1,2.1,3.1,3.4,5.4,3.4h1.5l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4 c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3l2-2C21.1,16.3,21.1,15.7,20.7,15.3z">
+                          </path>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                </button>
+              </h4>
+              <div class="range-container">
+                <label class="range">
+                  <div class="range-label-container">
+                    <span class="label">Board Size: </span><span id="gridSizeValue">5x5</span>
+                  </div>
+                  <input type="range" id="gridSize" min="3" max="10" value="5">
+                </label>
+              </div>
+              <div class="range-container">
+                <label class="range">
+                  <div class="range-label-container">
+                    <span class="label">Words in a Row: </span><span id="matchLengthValue">3</span>
+                  </div>
+                  <input type="range" id="matchLength" min="2" max="5" value="3">
+                </label>
+              </div>
+              <p class="field-hint">
+                The number of words in a row to score a point.
+                <span class="tooltip-container inline-tooltip">
+                  <button type="button" class="icon-button small tooltip-trigger" aria-label="Words in a Row Korean Info" aria-describedby="match-length-tooltip-ko">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
+                    </svg>
+                  </button>
+                  <span id="match-length-tooltip-ko" class="tooltip-popup" role="tooltip">
+                    점수를 획득하기 위해 한 줄로 이어야 하는 단어 수입니다.
+                  </span>
                 </span>
-              </span>
-            </p>
-          </div>
+              </p>
+            </div>
 
-          <div class="setup-section audio-settings">
-            <h4 class="h5">Audio & Speech</h4>
-            <div class="setting-group audio-toggles-group">
-              <label class="switch">
-                <input type="checkbox" role="switch" id="muteSoundsToggle">
-                <span class="label">Mute SoundFX</span>
+            <div class="setup-section audio-settings">
+              <h4 class="h5">Audio & Speech</h4>
+              <div class="setting-group audio-toggles-group">
+                <label class="switch">
+                  <input type="checkbox" role="switch" id="muteSoundsToggle">
+                  <span class="label">Mute SoundFX</span>
+                </label>
+                <label class="switch">
+                  <input type="checkbox" role="switch" id="pronounceWordsToggle" checked>
+                  <span class="label">Pronounce Words</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setup-section sync-settings" id="sync-settings-section">
+              <h4 class="h5">Upstash Sync</h4>
+              <label class="field">
+                <span class="label">Upstash REST URL</span>
+                <input type="text" id="upstash-url" name="upstash-url" placeholder="https://...upstash.io">
               </label>
-              <label class="switch">
-                <input type="checkbox" role="switch" id="pronounceWordsToggle" checked>
-                <span class="label">Pronounce Words</span>
+              <label class="field">
+                <span class="label">Upstash REST Token</span>
+                <input type="password" id="upstash-token" name="upstash-token" placeholder="Paste token here...">
               </label>
+              <div class="sync-actions">
+                <button id="save-sync-btn" class="button outlined small">Save & Sync</button>
+                <span id="sync-status" class="sync-status-msg"></span>
+              </div>
+              <p class="field-hint">(Optional) Connecting to Upstash Redis backs up and syncs your saved player lists and game statistics across devices.</p>
             </div>
           </div>
-
-          <div class="setup-section game-mode-setup">
-            <h4 class="h5">
-              Game Mode
-              <button id="randomizeGameModeBtn" class="icon-button small" aria-label="Randomize game mode">
-                <svg viewBox="0 0 24 24" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
-                  xmlns:xlink="http://www.w3.org/1999/xlink" fill="currentColor">
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                  <g id="SVGRepo_iconCarrier">
-                    <style type="text/css">
-                      .st0 {
-                        opacity: 0.2;
-                        fill: none;
-                        stroke: #000000;
-                        stroke-width: 5.000000e-02;
-                        stroke-miterlimit: 10;
-                      }
-                    </style>
-                    <g id="Layer_1"></g>
-                    <g id="Layer_2">
-                      <g>
-                        <path
-                          d="M8.7,14.2C8,14.7,7.1,15,6.2,15H4c-0.6,0-1,0.4-1,1s0.4,1,1,1h2.2c1.3,0,2.6-0.4,3.7-1.2c0.4-0.3,0.5-1,0.2-1.4 C9.7,13.9,9.1,13.8,8.7,14.2z">
-                        </path>
-                        <path
-                          d="M13,10.7c0.3,0,0.6-0.1,0.8-0.3C14.5,9.5,15.6,9,16.8,9h0.8l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4c0.2,0.2,0.5,0.3,0.7,0.3 s0.5-0.1,0.7-0.3l2-2c0.1-0.1,0.2-0.2,0.2-0.3c0.1-0.2,0.1-0.5,0-0.8c-0.1-0.1-0.1-0.2-0.2-0.3l-2-2c-0.4-0.4-1-0.4-1.4,0 s-0.4,1,0,1.4L17.6,7h-0.8c-1.8,0-3.4,0.8-4.6,2.1c-0.4,0.4-0.3,1,0.1,1.4C12.5,10.7,12.8,10.7,13,10.7z">
-                        </path>
-                        <path
-                          d="M20.7,15.3l-2-2c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4l0.3,0.3h-1.5c-1.6,0-2.9-0.9-3.6-2.3l-1.2-2.4C10.3,8.3,8.2,7,5.9,7H4 C3.4,7,3,7.4,3,8s0.4,1,1,1h1.9c1.6,0,2.9,0.9,3.6,2.3l1.2,2.4c1,2.1,3.1,3.4,5.4,3.4h1.5l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4 c0.2,0.2,0.5,0.3,0.7,0.3s0.5-0.1,0.7-0.3l2-2C21.1,16.3,21.1,15.7,20.7,15.3z">
-                        </path>
-                      </g>
-                    </g>
-                  </g>
-                </svg>
-              </button>
-            </h4>
-            <div class="game-mode-grid" id="gameModeSelector" role="radiogroup" aria-label="Game Mode">
-              <button type="button" role="radio" data-mode="Conquest" aria-checked="true" class="selected">
-                <span>Conquest</span>
-              </button>
-              <button type="button" role="radio" data-mode="Stealth" aria-checked="false">
-                <span>Stealth</span>
-              </button>
-              <button type="button" role="radio" data-mode="Classic" aria-checked="false">
-                <span>Classic</span>
-              </button>
-              <button type="button" role="radio" data-mode="Survivor" aria-checked="false">
-                <span>Survivor</span>
-              </button>
-            </div>
-            <div class="game-mode-hint-wrapper">
-              <p class="field-hint" id="gameModeHint">Get the most points.</p>
-              <div class="tooltip-container">
-                <button type="button" class="icon-button small tooltip-trigger" aria-label="Game Mode Korean Info" aria-describedby="game-mode-tooltip-ko">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
-                  </svg>
-                </button>
-                <div id="game-mode-tooltip-ko" class="tooltip-popup" role="tooltip">
-                  가장 많은 점수를 획득하세요.
-                </div>
-              </div>
-            </div>
-            <div id="modeRulesPanel" class="mode-rules-panel">
-              <div class="panel-inner">
-                <div id="conquestOptionsGroup" class="setting-group conquest-options">
-              <div class="option-row">
-                <label class="switch">
-                  <input type="checkbox" role="switch" id="conquestRotatingStarterToggle">
-                  <span class="label">Rotating Starters</span>
-                </label>
-                <div class="tooltip-group">
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Info" aria-describedby="conquest-starter-tooltip">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                    </button>
-                    <div id="conquest-starter-tooltip" class="tooltip-popup" role="tooltip">
-                      Rotates which player moves first at the start of each round to balance opening tempo.
-                    </div>
-                  </div>
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Korean Info" aria-describedby="conquest-starter-tooltip-ko">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
-                      </svg>
-                    </button>
-                    <div id="conquest-starter-tooltip-ko" class="tooltip-popup" role="tooltip">
-                      매 라운드마다 선공 플레이어를 교대하여 첫 번째 턴의 유리함을 조절합니다.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="option-row">
-                <label class="switch">
-                  <input type="checkbox" role="switch" id="conquestEqualRoundsToggle">
-                  <span class="label">Equal Rounds</span>
-                </label>
-                <div class="tooltip-group">
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Info" aria-describedby="conquest-rounds-tooltip">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                    </button>
-                    <div id="conquest-rounds-tooltip" class="tooltip-popup" role="tooltip">
-                      Ends the match once all players have taken an equal number of turns so no player gets an extra move on odd grids.
-                    </div>
-                  </div>
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Korean Info" aria-describedby="conquest-rounds-tooltip-ko">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
-                      </svg>
-                    </button>
-                    <div id="conquest-rounds-tooltip-ko" class="tooltip-popup" role="tooltip">
-                      모든 플레이어가 동일한 횟수의 턴을 마친 후 경기를 종료하여, 홀수 칸 그리드에서 특정 플레이어가 추가 턴을 갖지 않도록 합니다.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="option-row">
-                <label class="switch">
-                  <input type="checkbox" role="switch" id="conquestBlockPointsToggle" checked>
-                  <span class="label">Points for Blocks</span>
-                </label>
-                <div class="tooltip-group">
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Points for Blocks Info" aria-describedby="conquest-block-tooltip">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                    </button>
-                    <div id="conquest-block-tooltip" class="tooltip-popup" role="tooltip">
-                      Earn 0.5 points for each opponent scoring line blocked by your move (when not scoring a point).
-                    </div>
-                  </div>
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Points for Blocks Korean Info" aria-describedby="conquest-block-tooltip-ko">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
-                      </svg>
-                    </button>
-                    <div id="conquest-block-tooltip-ko" class="tooltip-popup" role="tooltip">
-                      자신의 턴에 점수를 내지 않더라도, 상대방의 득점 라인을 방어(블록)할 때마다 0.5점을 획득합니다.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="stealthOptionsGroup" class="setting-group stealth-options hidden">
-              <div class="option-row">
-                <label class="switch">
-                  <input type="checkbox" role="switch" id="stealthRotatingStarterToggle">
-                  <span class="label">Rotating Starters</span>
-                </label>
-                <div class="tooltip-group">
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Info" aria-describedby="stealth-starter-tooltip">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                    </button>
-                    <div id="stealth-starter-tooltip" class="tooltip-popup" role="tooltip">
-                      Rotates which player moves first at the start of each round to balance opening tempo.
-                    </div>
-                  </div>
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Korean Info" aria-describedby="stealth-starter-tooltip-ko">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
-                      </svg>
-                    </button>
-                    <div id="stealth-starter-tooltip-ko" class="tooltip-popup" role="tooltip">
-                      매 라운드마다 선공 플레이어를 교대하여 첫 번째 턴의 유리함을 조절합니다.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="option-row">
-                <label class="switch">
-                  <input type="checkbox" role="switch" id="stealthEqualRoundsToggle">
-                  <span class="label">Equal Rounds</span>
-                </label>
-                <div class="tooltip-group">
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Info" aria-describedby="stealth-rounds-tooltip">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                    </button>
-                    <div id="stealth-rounds-tooltip" class="tooltip-popup" role="tooltip">
-                      Ends the match once all players have taken an equal number of turns so no player is forced to take an extra turn.
-                    </div>
-                  </div>
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Korean Info" aria-describedby="stealth-rounds-tooltip-ko">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
-                      </svg>
-                    </button>
-                    <div id="stealth-rounds-tooltip-ko" class="tooltip-popup" role="tooltip">
-                      모든 플레이어가 동일한 횟수의 턴을 마친 후 경기를 종료하여, 특정 플레이어가 불필요하게 추가 턴을 하지 않도록 합니다.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="survivorOptionsGroup" class="setting-group survivor-options hidden">
-              <div class="option-row">
-                <label class="switch">
-                  <input type="checkbox" role="switch" id="survivorRotatingStarterToggle">
-                  <span class="label">Rotating Starters</span>
-                </label>
-                <div class="tooltip-group">
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Info" aria-describedby="survivor-starter-tooltip">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                    </button>
-                    <div id="survivor-starter-tooltip" class="tooltip-popup" role="tooltip">
-                      Rotates who starts each round among surviving players so the last player doesn't have an unfair advantage.
-                    </div>
-                  </div>
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Rotating Starters Korean Info" aria-describedby="survivor-starter-tooltip-ko">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
-                      </svg>
-                    </button>
-                    <div id="survivor-starter-tooltip-ko" class="tooltip-popup" role="tooltip">
-                      마지막 플레이어에게 불리하지 않도록, 살아남은 플레이어들 사이에서 매 라운드 선공을 번갈아 변경합니다.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="option-row">
-                <label class="switch">
-                  <input type="checkbox" role="switch" id="survivorEqualRoundsToggle">
-                  <span class="label">Equal Rounds</span>
-                </label>
-                <div class="tooltip-group">
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Info" aria-describedby="survivor-equal-rounds-tooltip">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                    </button>
-                    <div id="survivor-equal-rounds-tooltip" class="tooltip-popup" role="tooltip">
-                      Ensures all players get equal turns per round. When a player is eliminated, the round is completed so nobody is eliminated with fewer turns.
-                    </div>
-                  </div>
-                  <div class="tooltip-container">
-                    <button type="button" class="icon-button small tooltip-trigger" aria-label="Equal Rounds Korean Info" aria-describedby="survivor-equal-rounds-tooltip-ko">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <text x="12" y="12" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-family="'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif" font-weight="700" fill="currentColor" stroke="none">한</text>
-                      </svg>
-                    </button>
-                    <div id="survivor-equal-rounds-tooltip-ko" class="tooltip-popup" role="tooltip">
-                      모든 플레이어가 라운드당 동일한 턴을 갖도록 합니다. 탈락자가 발생해도 해당 라운드를 끝까지 마쳐 더 적은 턴으로 탈락하지 않도록 보장합니다.
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="setup-section word-selection">
-            <h4 class="h5">
-              Word Selection
-              <button type="button" id="reset-units-btn" class="icon-button small" aria-label="Reset all units" title="Reset all units">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                  <path d="M3 3v5h5"></path>
-                </svg>
-              </button>
-              <button type="button" id="manage-books-btn" class="icon-button small" aria-label="Manage textbook series visibility" title="Manage Books" style="display: none;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                </svg>
-              </button>
-            </h4>
-            <div class="word-selection-container">
-              <label class="field book-selection-field" id="book-select-field" style="display: none; width: 100%; max-width: 320px; margin-bottom: 0.5rem;">
-                <span class="label">Textbook Series</span>
-                <select id="book-select" class="book-select"></select>
-              </label>
-
-              <!-- Level Tabs Navigation -->
-              <div id="unit-level-tabs" class="unit-level-tabs" role="tablist" aria-label="Textbook Levels">
-              </div>
-
-              <!-- Active Level Toolbar -->
-              <div id="active-level-toolbar" class="active-level-toolbar">
-                <button type="button" id="toggle-level-all-btn" class="button outlined small toggle-level-all-btn">Select All</button>
-              </div>
-
-              <!-- Unit Chips Grid -->
-              <div id="unit-chips-grid" class="unit-chips-grid" role="group" aria-label="Unit Selection">
-              </div>
-            </div>
-          </div>
-
-          <div class="setup-section api-settings" id="api-settings-section">
-            <h4 class="h5">API Settings</h4>
-            <label class="field" id="api-key-field">
-              <span class="label">ElevenLabs API Key</span>
-              <input type="password" id="elevenlabs-api-key" name="elevenlabs-api-key" autocomplete="off"
-                placeholder="Paste your key here...">
-            </label>
-            <div class="api-actions">
-              <button id="save-api-key-btn" class="button outlined small">Save & Verify</button>
-              <span id="api-key-status" class="api-status-msg"></span>
-            </div>
-            <p class="field-hint">(Optional) An ElevenLabs API key is needed for a high quality voice. <br> Your key is
-              stored
-              securely in your browser and never leaves your computer.</p>
-          </div>
-
-          <div class="setup-section sync-settings" id="sync-settings-section">
-            <h4 class="h5">Upstash Sync</h4>
-            <label class="field">
-              <span class="label">Upstash REST URL</span>
-              <input type="text" id="upstash-url" name="upstash-url" placeholder="https://...upstash.io">
-            </label>
-            <label class="field">
-              <span class="label">Upstash REST Token</span>
-              <input type="password" id="upstash-token" name="upstash-token" placeholder="Paste token here...">
-            </label>
-            <div class="sync-actions">
-              <button id="save-sync-btn" class="button outlined small">Save & Sync</button>
-              <span id="sync-status" class="sync-status-msg"></span>
-            </div>
-            <p class="field-hint">(Optional) Connecting to Upstash Redis backs up and syncs your saved player lists and game statistics across devices.</p>
-          </div>
-
         </div>
 
         <div class="actions">
