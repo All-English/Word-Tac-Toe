@@ -1562,7 +1562,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else {
         soundPromise = playSoundSequentially("score", pointsScored)
       }
-    } else if (wasBlock && gameState.gameMode !== "Survivor") {
+    } else if (
+      wasBlock &&
+      gameState.gameMode !== "Survivor" &&
+      gameState.gameMode !== "Stealth"
+    ) {
       soundPromise = playSoundSequentially("block", linesBlocked)
       const cell = gameBoard.querySelector(`[data-index='${index}']`)
       if (cell) {
