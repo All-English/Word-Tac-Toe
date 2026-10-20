@@ -1271,6 +1271,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       isMuted: gameState.isMuted,
     }
 
+    clearBlockLightning()
     gameBoard
       .querySelectorAll(".strike-through-line")
       .forEach((el) => el.remove())
@@ -1322,6 +1323,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function undoLastMove() {
     if (gameState.moveHistory.length === 0 || isMoveProcessing) return
+    clearBlockLightning()
 
     const lastMove = gameState.moveHistory[gameState.moveHistory.length - 1]
 
@@ -1492,7 +1494,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function processPlayerMove(index, skipClickSound = false) {
     // This function now contains the core game logic
-    const { wasBlock, linesBlocked } = checkForBlock(index)
+    const { wasBlock, linesBlocked, blockedLines } = checkForBlock(index)
     if (wasBlock) {
       gameState.playerStatsThisGame[gameState.currentPlayer].blocks +=
         linesBlocked
@@ -1578,6 +1580,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       gameState.gameMode !== "Stealth"
     ) {
       soundPromise = playSoundSequentially("block", linesBlocked)
+      triggerBlockLightning(index, blockedLines)
       const cell = gameBoard.querySelector(`[data-index='${index}']`)
       if (cell) {
         cell.classList.add("blocked")
@@ -1956,6 +1959,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function checkForBlock(moveIndex) {
     let totalLinesBlocked = 0
+    const blockedLines = []
     const originalPlayer = gameState.currentPlayer
     for (
       let opponentIndex = 0;
@@ -1976,11 +1980,20 @@ document.addEventListener("DOMContentLoaded", async () => {
           line.includes(moveIndex) &&
           !gameState.completedLines.has(lineToString(line)),
       )
+      if (newWins.length > 0) {
+        newWins.forEach((line) => {
+          blockedLines.push({
+            opponent: opponentIndex,
+            line: line,
+          })
+        })
+      }
       totalLinesBlocked += newWins.length
     }
     return {
       wasBlock: totalLinesBlocked > 0,
       linesBlocked: totalLinesBlocked,
+      blockedLines,
     }
   }
 
@@ -3029,6 +3042,291 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 10)
 
     return line
+  }
+
+  function clearBlockLightning() {
+    const gameBoard = document.getElementById("game-board")
+    if (!gameBoard) return
+    gameBoard
+      .querySelectorAll(".block-lightning-overlay")
+      .forEach((el) => el.remove())
+    gameBoard
+      .querySelectorAll(".block-target-surge")
+      .forEach((el) => el.classList.remove("block-target-surge"))
+  }
+
+  function triggerBlockLightning(blockIndex, blockedLines) {
+    if (!blockedLines || blockedLines.length === 0) return
+    const gameBoard = document.getElementById("game-board")
+    if (!gameBoard) return
+
+    clearBlockLightning()
+
+    const boardRect = gameBoard.getBoundingClientRect()
+    if (!boardRect.width || !boardRect.height) return
+
+    const svgNS = "http://www.w3.org/2000/svg"
+    const svg = document.createElementNS(svgNS, "svg")
+    svg.classList.add("block-lightning-overlay")
+    svg.setAttribute("viewBox", `0 0 ${boardRect.width} ${boardRect.height}`)
+    svg.setAttribute("width", `${boardRect.width}`)
+    svg.setAttribute("height", `${boardRect.height}`)
+
+    const getCellCenter = (idx) => {
+      const cell = gameBoard.querySelector(`[data-index='${idx}']`)
+      if (!cell) return null
+      const rect = cell.getBoundingClientRect()
+      return {
+        x: rect.left + rect.width / 2 - boardRect.left,
+        y: rect.top + rect.height / 2 - boardRect.top,
+      }
+    }
+
+    const startPt = getCellCenter(blockIndex)
+    if (!startPt) return
+
+    const generateJaggedPoints = (waypoints, maxJitter = 10) => {
+      const pts = []
+      for (let i = 0; i < waypoints.length - 1; i++) {
+        const p1 = waypoints[i]
+        const p2 = waypoints[i + 1]
+        const dx = p2.x - p1.x
+        const dy = p2.y - p1.y
+        const dist = Math.hypot(dx, dy)
+        if (dist === 0) continue
+
+        const nx = -dy / dist
+        const ny = dx / dist
+        const segments = Math.max(4, Math.round(dist / 16))
+
+        if (i === 0) pts.push({ x: p1.x, y: p1.y })
+
+        for (let s = 1; s < segments; s++) {
+          const t = s / segments
+          const envelope = Math.sin(t * Math.PI)
+          const jitter = (Math.random() - 0.5) * 2 * maxJitter * envelope
+          const longitudinal = (Math.random() - 0.5) * (dist / segments) * 0.3
+
+          pts.push({
+            x: p1.x + dx * t + nx * jitter + (dx / dist) * longitudinal,
+            y: p1.y + dy * t + ny * jitter + (dy / dist) * longitudinal,
+          })
+        }
+        pts.push({ x: p2.x, y: p2.y })
+      }
+      return pts
+    }
+
+    const pointsToD = (pts) => {
+      if (pts.length === 0) return ""
+      let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`
+      for (let i = 1; i < pts.length; i++) {
+        d += ` L ${pts[i].x.toFixed(1)} ${pts[i].y.toFixed(1)}`
+      }
+      return d
+    }
+
+    const generateBranches = (pts, maxBranches = 2) => {
+      const branchPaths = []
+      if (pts.length < 5) return branchPaths
+      const step = Math.floor(pts.length / (maxBranches + 1))
+      for (let b = 1; b <= maxBranches; b++) {
+        const baseIdx = b * step + Math.floor((Math.random() - 0.5) * 2)
+        if (baseIdx <= 0 || baseIdx >= pts.length - 1) continue
+        const base = pts[baseIdx]
+        const prev = pts[baseIdx - 1]
+        const next = pts[baseIdx + 1]
+        const mainAngle = Math.atan2(next.y - prev.y, next.x - prev.x)
+        const sign = Math.random() > 0.5 ? 1 : -1
+        const branchAngle = mainAngle + sign * (0.6 + Math.random() * 0.4)
+        const branchLen = 14 + Math.random() * 12
+
+        const segs = 3
+        let curr = { ...base }
+        let branchD = `M ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`
+        for (let s = 1; s <= segs; s++) {
+          const segDist = branchLen / segs
+          const lateral = (Math.random() - 0.5) * 4
+          curr = {
+            x: curr.x + Math.cos(branchAngle) * segDist - Math.sin(branchAngle) * lateral,
+            y: curr.y + Math.sin(branchAngle) * segDist + Math.cos(branchAngle) * lateral,
+          }
+          branchD += ` L ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`
+        }
+        branchPaths.push(branchD)
+      }
+      return branchPaths
+    }
+
+    // Measure counter-clockwise angle from 12 o'clock (0 rad = Up, π/2 = Left, π = Down, 3π/2 = Right)
+    const getLineAngle = (line, bIdx) => {
+      const blockPos = line.indexOf(bIdx)
+      if (blockPos === -1) return 0
+
+      const angles = []
+      const leftSide = line.slice(0, blockPos).reverse()
+      const rightSide = line.slice(blockPos + 1)
+
+      if (leftSide.length > 0) {
+        const pt = getCellCenter(leftSide[leftSide.length - 1])
+        if (pt) {
+          const dx = pt.x - startPt.x
+          const dy = pt.y - startPt.y
+          const a = (Math.atan2(-dx, -dy) + 2 * Math.PI) % (2 * Math.PI)
+          angles.push(a)
+        }
+      }
+
+      if (rightSide.length > 0) {
+        const pt = getCellCenter(rightSide[rightSide.length - 1])
+        if (pt) {
+          const dx = pt.x - startPt.x
+          const dy = pt.y - startPt.y
+          const a = (Math.atan2(-dx, -dy) + 2 * Math.PI) % (2 * Math.PI)
+          angles.push(a)
+        }
+      }
+
+      return angles.length > 0 ? Math.min(...angles) : 0
+    }
+
+    // Sort blocked lines in counter-clockwise sweep order starting from 12 o'clock
+    const sortedBlockedLines = [...blockedLines].sort((a, b) => {
+      return getLineAngle(a.line, blockIndex) - getLineAngle(b.line, blockIndex)
+    })
+
+    sortedBlockedLines.forEach((item, lineIdx) => {
+      const fullLine = item.line
+      const blockPos = fullLine.indexOf(blockIndex)
+      if (blockPos === -1) return
+
+      const branches = []
+      const leftSide = fullLine.slice(0, blockPos).reverse()
+      const rightSide = fullLine.slice(blockPos + 1)
+      if (leftSide.length > 0) branches.push(leftSide)
+      if (rightSide.length > 0) branches.push(rightSide)
+
+      // Sort branches within the line in counter-clockwise order
+      branches.sort((sideA, sideB) => {
+        const ptA = getCellCenter(sideA[sideA.length - 1])
+        const ptB = getCellCenter(sideB[sideB.length - 1])
+        const angleA = ptA
+          ? (Math.atan2(-(ptA.x - startPt.x), -(ptA.y - startPt.y)) +
+              2 * Math.PI) %
+            (2 * Math.PI)
+          : 0
+        const angleB = ptB
+          ? (Math.atan2(-(ptB.x - startPt.x), -(ptB.y - startPt.y)) +
+              2 * Math.PI) %
+            (2 * Math.PI)
+          : 0
+        return angleA - angleB
+      })
+
+      const lineGroup = document.createElementNS(svgNS, "g")
+      lineGroup.classList.add("lightning-group")
+      if (lineIdx > 0) {
+        lineGroup.style.display = "none"
+      }
+
+      const targetIndices = [...leftSide, ...rightSide]
+      const branchDataList = []
+
+      branches.forEach((sideIndices) => {
+        const waypoints = [startPt]
+        sideIndices.forEach((idx) => {
+          const pt = getCellCenter(idx)
+          if (pt) waypoints.push(pt)
+        })
+        if (waypoints.length < 2) return
+
+        const pts = generateJaggedPoints(waypoints)
+        const mainD = pointsToD(pts)
+        const branchDs = generateBranches(pts)
+
+        const glowPath = document.createElementNS(svgNS, "path")
+        glowPath.classList.add("lightning-bolt-glow")
+        glowPath.setAttribute("d", mainD)
+
+        const corePath = document.createElementNS(svgNS, "path")
+        corePath.classList.add("lightning-bolt-core")
+        corePath.setAttribute("d", mainD)
+
+        lineGroup.appendChild(glowPath)
+        lineGroup.appendChild(corePath)
+
+        branchDs.forEach((b) => {
+          const bp = document.createElementNS(svgNS, "path")
+          bp.classList.add("lightning-branch")
+          bp.setAttribute("d", b)
+          lineGroup.appendChild(bp)
+        })
+
+        branchDataList.push({ waypoints, glowPath, corePath })
+      })
+
+      svg.appendChild(lineGroup)
+
+      const delay = lineIdx * 280
+      setTimeout(() => {
+        if (!svg.isConnected) return
+        lineGroup.style.display = ""
+
+        targetIndices.forEach((idx) => {
+          const c = gameBoard.querySelector(`[data-index='${idx}']`)
+          if (c) {
+            c.classList.add("block-target-surge")
+            setTimeout(() => c.classList.remove("block-target-surge"), 600)
+          }
+        })
+
+        branchDataList.forEach(({ waypoints, glowPath, corePath }) => {
+          try {
+            const totalLen = corePath.getTotalLength()
+            if (totalLen > 0) {
+              const animKeyframes = [
+                { strokeDashoffset: totalLen },
+                { strokeDashoffset: 0 },
+              ]
+              const animTiming = {
+                duration: 65,
+                easing: "ease-out",
+                fill: "forwards",
+              }
+
+              glowPath.style.strokeDasharray = `${totalLen}`
+              glowPath.animate(animKeyframes, animTiming)
+
+              corePath.style.strokeDasharray = `${totalLen}`
+              corePath.animate(animKeyframes, animTiming)
+            }
+          } catch (e) {}
+
+          setTimeout(() => {
+            if (!svg.isConnected) return
+            const newPts = generateJaggedPoints(waypoints, 8)
+            const newD = pointsToD(newPts)
+            glowPath.setAttribute("d", newD)
+            corePath.setAttribute("d", newD)
+          }, 110)
+
+          setTimeout(() => {
+            if (!svg.isConnected) return
+            const newPts2 = generateJaggedPoints(waypoints, 6)
+            const newD2 = pointsToD(newPts2)
+            glowPath.setAttribute("d", newD2)
+            corePath.setAttribute("d", newD2)
+          }, 190)
+        })
+      }, delay)
+    })
+
+    gameBoard.appendChild(svg)
+
+    const totalLifetime = (blockedLines.length - 1) * 280 + 550
+    setTimeout(() => {
+      svg.remove()
+    }, totalLifetime)
   }
 
   function generatePlayerColors() {
