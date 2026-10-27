@@ -283,8 +283,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
       let activeClassMatch = null
+      let loadedProfiles = {}
       if (typeof window.SharedClassSync !== "undefined") {
         const { playerSets, classProfiles } = await window.SharedClassSync.loadAllClasses()
+        loadedProfiles = classProfiles || {}
         if (typeof populateSetsDialog === "function") populateSetsDialog()
         activeClassMatch = window.SharedClassSync.findActiveScheduledClass(classProfiles)
       } else if (hasCreds) {
@@ -308,7 +310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (activeClassMatch && !hasExplicitClassOverride) {
         handleLoadSet(activeClassMatch.className, true)
       } else if (!activeClassMatch) {
-        // Priority 2: Outside class hours, fall back to active session players
+        // Priority 2: Outside class hours, fall back to active session players & latest cross-app units
         let activePlayers = window.SharedClassSync?.getActivePlayers?.()
         if (!activePlayers || activePlayers.length === 0) {
           if (hasCreds) {
@@ -332,6 +334,48 @@ document.addEventListener("DOMContentLoaded", async () => {
             gameState.setup.players = assignRandomColors(newPlayers, false)
             renderNameInputs()
             validatePlayerNames()
+          }
+        }
+
+        if (typeof window.SharedClassSync !== "undefined") {
+          const activeSession = window.SharedClassSync.getActiveSession?.()
+          if (activeSession && activeSession.className) {
+            currentLoadedSetName = activeSession.className
+          }
+
+          const latestActiveUnits = window.SharedClassSync.getActiveUnits?.()
+          const sessionProf = (activeSession && activeSession.className) ? loadedProfiles[activeSession.className] : null
+
+          let candidateUnits = null
+          let candidateCurId = null
+          let candidateTime = 0
+
+          if (sessionProf && Array.isArray(sessionProf.units) && sessionProf.units.length > 0) {
+            candidateUnits = sessionProf.units
+            candidateCurId = sessionProf.curriculumId || "smart-phonics"
+            candidateTime = sessionProf.updatedAt || 0
+          }
+
+          if (
+            latestActiveUnits &&
+            Array.isArray(latestActiveUnits.units) &&
+            latestActiveUnits.units.length > 0 &&
+            (latestActiveUnits.updatedAt || 0) >= candidateTime
+          ) {
+            candidateUnits = latestActiveUnits.units
+            candidateCurId = latestActiveUnits.curriculumId || candidateCurId || "smart-phonics"
+            candidateTime = latestActiveUnits.updatedAt || 0
+          }
+
+          let localSettingsTime = 0
+          try {
+            const saved = JSON.parse(localStorage.getItem("phonics_game_settings") || "{}")
+            localSettingsTime = saved.updatedAt || 0
+          } catch {}
+
+          if (candidateUnits && candidateUnits.length > 0 && (candidateTime > localSettingsTime || selectedUnitKeys.size === 0)) {
+            applyUnitsToTicTacToe(candidateUnits, candidateCurId)
+            saveSettings({ skipSharedSync: true, preserveUpdatedAt: candidateTime || Date.now() })
           }
         }
       }
@@ -3419,7 +3463,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     pronounceWordsToggle.disabled = isMuted
   }
 
-  function saveSettings() {
+  function saveSettings(options = {}) {
     const isTwoPlayers = gameState.setup.players.length <= 2
     const settingsToSave = {
       numPlayers: gameState.setup.players.length,
@@ -3465,6 +3509,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       activeLevelKey: currentActiveLevelKey,
       darkMode: darkModeToggle.checked,
       themeHue: themeHueSelect.value,
+      updatedAt: options.preserveUpdatedAt || Date.now(),
     }
 
     localStorage.setItem(
@@ -3472,17 +3517,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       JSON.stringify(settingsToSave),
     )
 
+    if (options.skipSharedSync) return
+
     // Save active session players to shared storage and sync
     const activeNames = gameState.setup.players.map((p) => p.name).filter(Boolean)
     saveActiveSessionPlayers(activeNames)
 
-    // Auto-sync units to active class profile in SharedClassSync
-    if (currentLoadedSetName && typeof window.SharedClassSync !== "undefined") {
+    // Auto-sync units to active class profile & shared active units in SharedClassSync
+    if (typeof window.SharedClassSync !== "undefined") {
       const canonicals = settingsToSave.selectedUnits
         .map((s) => window.SharedClassSync.toCanonicalUnit(s)?.id)
         .filter(Boolean)
       if (canonicals.length > 0) {
-        window.SharedClassSync.saveClassUnits(currentLoadedSetName, canonicals)
+        if (currentLoadedSetName) {
+          window.SharedClassSync.saveClassUnits(currentLoadedSetName, canonicals, activeSeriesId)
+        } else if (typeof window.SharedClassSync.saveActiveUnits === "function") {
+          window.SharedClassSync.saveActiveUnits(canonicals, activeSeriesId, null)
+        }
       }
     }
   }
@@ -5097,19 +5148,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     const bookSelectEl = document.getElementById("book-select")
     if (bookSelectEl) bookSelectEl.value = activeSeriesId
 
-    // 2. Filter canonical units to only those belonging to primarySeries
-    const seriesUnits = canonicalUnits.filter((u) => {
+    // 2. Filter canonical units to only those belonging to primarySeries (fallback to all if none match prefix)
+    let seriesUnits = canonicalUnits.filter((u) => {
       const c = window.SharedClassSync ? window.SharedClassSync.toCanonicalUnit(u) : null
       return (c?.series || "smart-phonics") === primarySeries
     })
-
-    if (seriesUnits.length < canonicalUnits.length) {
+    if (seriesUnits.length === 0) {
+      seriesUnits = canonicalUnits
+    } else if (seriesUnits.length < canonicalUnits.length) {
       console.info(`[Word-Tac-Toe] Scoped to "${primarySeries}". Filtered out ${canonicalUnits.length - seriesUnits.length} unit(s) belonging to other series.`)
     }
 
     selectedUnitKeys.clear()
     seriesUnits.forEach((u) => {
-      const ttValue = window.SharedClassSync ? window.SharedClassSync.toTicTacToe(u) : u
+      let ttValue = window.SharedClassSync ? window.SharedClassSync.toTicTacToe(u) : u
+      if (ttValue && primarySeries !== "smart-phonics" && !ttValue.startsWith(`${primarySeries}|`)) {
+        const parts = ttValue.split("|")
+        if (parts.length === 2) {
+          ttValue = `${primarySeries}|${parts[0]}|${parts[1]}`
+        }
+      }
       if (ttValue) {
         selectedUnitKeys.add(ttValue)
       }
@@ -5225,37 +5283,58 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    if (!rawNames) return
-
     currentLoadedSetName = setName
 
-    const playerNames = (preferActiveSession && window.SharedClassSync?.resolveClassRoster)
-      ? window.SharedClassSync.resolveClassRoster(setName, rawNames)
-      : rawNames
+    if (Array.isArray(rawNames) && rawNames.length > 0) {
+      const playerNames = (preferActiveSession && window.SharedClassSync?.resolveClassRoster)
+        ? window.SharedClassSync.resolveClassRoster(setName, rawNames)
+        : rawNames
 
-    const newPlayers = playerNames.map((name, index) => ({
-      id: Date.now() + index,
-      name: name,
-    }))
+      const newPlayers = playerNames.map((name, index) => ({
+        id: Date.now() + index,
+        name: name,
+      }))
 
-    gameState = {
-      ...gameState,
-      setup: { ...gameState.setup, players: assignRandomColors(newPlayers, true) },
+      gameState = {
+        ...gameState,
+        setup: { ...gameState.setup, players: assignRandomColors(newPlayers, true) },
+      }
+
+      renderNameInputs()
+      updatePlayerButtonsState()
+      updateMatchLengthDefault()
+      updateRotatingStartersDefault()
+      updateEqualRoundsDefault()
     }
 
-    renderNameInputs()
-    updatePlayerButtonsState()
-    updateMatchLengthDefault()
-    updateRotatingStartersDefault()
-    updateEqualRoundsDefault()
-
     // Also load unit settings for this class if available BEFORE saving settings
+    let chosenUpdatedAt = 0
     if (typeof window.SharedClassSync !== "undefined") {
       try {
         const rawProfiles = localStorage.getItem(window.SharedClassSync.SHARED_CLASS_PROFILES_KEY)
         const profiles = rawProfiles ? JSON.parse(rawProfiles) : {}
-        if (profiles[setName] && Array.isArray(profiles[setName].units) && profiles[setName].units.length > 0) {
-          applyUnitsToTicTacToe(profiles[setName].units, profiles[setName].curriculumId)
+        const prof = profiles[setName]
+        const latestActiveUnits = window.SharedClassSync.getActiveUnits?.()
+
+        let unitsToApply = (prof && Array.isArray(prof.units) && prof.units.length > 0) ? prof.units : null
+        let curIdToApply = prof?.curriculumId || null
+        chosenUpdatedAt = prof?.updatedAt || 0
+
+        // If another app updated units very recently (within 2 hours) and newer than the class profile, adopt them
+        if (
+          latestActiveUnits &&
+          Array.isArray(latestActiveUnits.units) &&
+          latestActiveUnits.units.length > 0 &&
+          (Date.now() - (latestActiveUnits.updatedAt || 0) < 2 * 60 * 60 * 1000) &&
+          (latestActiveUnits.updatedAt || 0) > chosenUpdatedAt
+        ) {
+          unitsToApply = latestActiveUnits.units
+          curIdToApply = latestActiveUnits.curriculumId || curIdToApply
+          chosenUpdatedAt = latestActiveUnits.updatedAt || Date.now()
+        }
+
+        if (unitsToApply && unitsToApply.length > 0) {
+          applyUnitsToTicTacToe(unitsToApply, curIdToApply)
         }
       } catch (e) {
         console.warn("Error applying units for loaded set:", e)
@@ -5266,7 +5345,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       playerSetsDialog.close()
     }
     validatePlayerNames()
-    saveSettings()
+    saveSettings({ skipSharedSync: true, preserveUpdatedAt: chosenUpdatedAt || Date.now() })
   }
 
   function handleDeleteSet(setName) {
@@ -5645,6 +5724,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     })
   }
+
+  // Re-sync when switching back to an open Word-Tac-Toe tab on the setup screen
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && gameState.currentView === "setup") {
+      syncWithUpstashOnLoad()
+    }
+  })
 
   window.addEventListener("resize", () => {
     if (gameState.currentView === "game" || gameState.currentView === "reorder") {
