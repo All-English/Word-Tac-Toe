@@ -2534,7 +2534,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`
     const payload = {
       text: text,
-      model_id: "eleven_flash_v2",
+      model_id: "eleven_v4_turbo",
       voice_settings: {
         stability: 0.5,
         similarity_boost: 0.75,
@@ -2702,7 +2702,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       const body = JSON.stringify({
         text: text,
-        model_id: "eleven_flash_v2",
+        model_id: "eleven_v4_turbo",
         voice_settings: {
           stability: 0.5,
           similarity_boost: 0.75,
