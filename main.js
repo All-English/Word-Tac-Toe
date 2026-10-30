@@ -5320,13 +5320,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         let curIdToApply = prof?.curriculumId || null
         chosenUpdatedAt = prof?.updatedAt || 0
 
-        // If another app updated units very recently (within 2 hours) and newer than the class profile, adopt them
+        // If another app updated units for this class (or during this class's current session window) more recently than the class profile, adopt them
         if (
           latestActiveUnits &&
           Array.isArray(latestActiveUnits.units) &&
           latestActiveUnits.units.length > 0 &&
-          (Date.now() - (latestActiveUnits.updatedAt || 0) < 2 * 60 * 60 * 1000) &&
-          (latestActiveUnits.updatedAt || 0) > chosenUpdatedAt
+          (latestActiveUnits.updatedAt || 0) > chosenUpdatedAt &&
+          (
+            latestActiveUnits.className === setName ||
+            (
+              !latestActiveUnits.className &&
+              window.SharedClassSync.isTimestampInCurrentClassSession?.(latestActiveUnits.updatedAt, setName, prof)
+            )
+          )
         ) {
           unitsToApply = latestActiveUnits.units
           curIdToApply = latestActiveUnits.curriculumId || curIdToApply
