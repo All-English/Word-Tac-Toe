@@ -560,6 +560,13 @@ export const englishVoices = [
     use_case: "EDUCATION",
   },
   {
+    name: "Arabella",
+    voice_id: "Z3R5wn05IrDiVCyEkUrK",
+    gender: "FEMALE",
+    description: "Young, clear, and bright American female voice.",
+    use_case: "NARRATION",
+  },
+  {
     name: "River",
     voice_id: "SAz9YHcvj6GT2YYXdXww",
     gender: "NEUTRAL",
@@ -580,13 +587,20 @@ export const englishVoices = [
     description: "Young adult with energy and warmth.",
     use_case: "SOCIAL_MEDIA",
   },
-  // {
-  //   name: "Eric",
-  //   voice_id: "cjVigY5qzO86Huf0OWal",
-  //   gender: "MALE",
-  //   description: "Smooth American tenor, perfect for professional use.",
-  //   use_case: "CONVERSATIONAL",
-  // },
+  {
+    name: "Eric",
+    voice_id: "cjVigY5qzO86Huf0OWal",
+    gender: "MALE",
+    description: "Smooth American tenor, perfect for professional use.",
+    use_case: "CONVERSATIONAL",
+  },
+  {
+    name: "Callum",
+    voice_id: "N2lVS1w4EtoT3dr4eOWO",
+    gender: "MALE",
+    description: "Husky, trickster American male voice.",
+    use_case: "CHARACTERS",
+  },
   {
     name: "Brian",
     voice_id: "nPczCjzI2devNBz1zQrb",
@@ -607,13 +621,6 @@ export const englishVoices = [
     gender: "MALE",
     description: "Relaxed, conversational, and laid back.",
     use_case: "CONVERSATIONAL",
-  },
-  {
-    name: "Adam",
-    voice_id: "pNInz6obpgDQGcFmaJgB",
-    gender: "MALE",
-    description: "Confident and bright American tenor.",
-    use_case: "SOCIAL_MEDIA",
   },
   {
     name: "Roger",
