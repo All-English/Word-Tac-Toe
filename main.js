@@ -120,17 +120,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   const apiKeyStatus = document.getElementById("api-key-status")
   let userApiKey = ""
 
+  // ElevenLabs Pronunciation Dictionary (Korean Player Names)
+  const ELEVENLABS_PRONUNCIATION_DICT_ID = "sKcMTMc7IZdOIqGSuKGL"
+  const ELEVENLABS_PRONUNCIATION_VERSION_ID = "5wJKv5m0cQSYvi7mjFS1"
+
   // 1. On page load, try to get the key from localStorage
   const savedKey = localStorage.getItem("elevenlabs_api_key")
   if (savedKey) {
     userApiKey = savedKey
-    apiKeyInput.value = userApiKey
+    if (apiKeyInput) apiKeyInput.value = userApiKey
   }
 
   // 2. Click handler to save and verify ElevenLabs API Key
   if (saveApiKeyBtn) {
     saveApiKeyBtn.addEventListener("click", async () => {
-      const key = apiKeyInput.value.trim()
+      const key = apiKeyInput?.value.trim() || ""
 
       if (!key) {
         localStorage.removeItem("elevenlabs_api_key")
@@ -2566,10 +2570,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         similarity_boost: 0.75,
         speed: 0.85,
       },
+      pronunciation_dictionary_locators: [
+        {
+          pronunciation_dictionary_id: ELEVENLABS_PRONUNCIATION_DICT_ID,
+          version_id: ELEVENLABS_PRONUNCIATION_VERSION_ID,
+        },
+      ],
     }
 
     try {
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2577,6 +2587,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         },
         body: JSON.stringify(payload),
       })
+
+      // Fallback: if dictionary locator is not accessible on this account, retry without it
+      if (!response.ok && payload.pronunciation_dictionary_locators) {
+        delete payload.pronunciation_dictionary_locators
+        response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "xi-api-key": userApiKey,
+          },
+          body: JSON.stringify(payload),
+        })
+      }
 
       if (response.ok) {
         const blob = await response.blob()
@@ -2726,7 +2749,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "Content-Type": "application/json",
         "xi-api-key": userApiKey,
       }
-      const body = JSON.stringify({
+      const payload = {
         text: text,
         model_id: "eleven_v4_turbo",
         voice_settings: {
@@ -2734,12 +2757,26 @@ document.addEventListener("DOMContentLoaded", async () => {
           similarity_boost: 0.75,
           speed: 0.85,
         },
-      })
+        pronunciation_dictionary_locators: [
+          {
+            pronunciation_dictionary_id: ELEVENLABS_PRONUNCIATION_DICT_ID,
+            version_id: ELEVENLABS_PRONUNCIATION_VERSION_ID,
+          },
+        ],
+      }
+
+      let body = JSON.stringify(payload)
 
       const voiceIdentifier = randomVoice.name || randomVoice.voice_id
 
       try {
-        const response = await fetch(url, { method: "POST", headers, body })
+        let response = await fetch(url, { method: "POST", headers, body })
+
+        if (!response.ok && payload.pronunciation_dictionary_locators) {
+          delete payload.pronunciation_dictionary_locators
+          body = JSON.stringify(payload)
+          response = await fetch(url, { method: "POST", headers, body })
+        }
 
         if (response.ok) {
           const audioBlob = await response.blob()
