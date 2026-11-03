@@ -1706,6 +1706,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                   nextStarter = (nextStarter + 1) % gameState.numPlayers
                 }
 
+                // Ensure a player never takes two consecutive turns across round boundaries
+                if (
+                  nextStarter === gameState.currentPlayer &&
+                  survivingPlayers.length > 1
+                ) {
+                  const currentIdx = survivingPlayers.indexOf(nextStarter)
+                  const nextIdx =
+                    currentIdx !== -1
+                      ? (currentIdx + 1) % survivingPlayers.length
+                      : 0
+                  nextStarter = survivingPlayers[nextIdx]
+                }
+
                 nextRoundOrder = []
                 for (let i = 0; i < gameState.numPlayers; i++) {
                   const p = (nextStarter + i) % gameState.numPlayers
@@ -1770,6 +1783,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                   (gameState.survivorRoundStarter + 1) % gameState.numPlayers
                 while (gameState.eliminatedPlayers.includes(nextStarter)) {
                   nextStarter = (nextStarter + 1) % gameState.numPlayers
+                }
+
+                // Ensure a player never takes two consecutive turns across round boundaries
+                if (
+                  nextStarter === gameState.currentPlayer &&
+                  survivingPlayers.length > 1
+                ) {
+                  const currentIdx = survivingPlayers.indexOf(nextStarter)
+                  const nextIdx =
+                    currentIdx !== -1
+                      ? (currentIdx + 1) % survivingPlayers.length
+                      : 0
+                  nextStarter = survivingPlayers[nextIdx]
                 }
 
                 const nextRoundOrder = []
