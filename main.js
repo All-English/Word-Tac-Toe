@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ElevenLabs Pronunciation Dictionary (Korean Player Names)
   const ELEVENLABS_PRONUNCIATION_DICT_ID = "sKcMTMc7IZdOIqGSuKGL"
-  const ELEVENLABS_PRONUNCIATION_VERSION_ID = "5wJKv5m0cQSYvi7mjFS1"
+  const ELEVENLABS_PRONUNCIATION_VERSION_ID = "lBWAKvEKQsfx4Ajakhf7"
 
   // 1. On page load, try to get the key from localStorage
   const savedKey = localStorage.getItem("elevenlabs_api_key")

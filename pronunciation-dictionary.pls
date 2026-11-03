@@ -132,6 +132,36 @@
     <phoneme>/kʌ̹n.u/</phoneme>
   </lexeme>
 
+  <!-- Geonhoo (건후) -->
+  <lexeme>
+    <grapheme>건후</grapheme>
+    <phoneme>/kʌ̹n.hu/</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>Geonhoo</grapheme>
+    <phoneme>/kʌ̹n.hu/</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>geonhoo</grapheme>
+    <phoneme>/kʌ̹n.hu/</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>Gunhoo</grapheme>
+    <phoneme>/kʌ̹n.hu/</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>gunhoo</grapheme>
+    <phoneme>/kʌ̹n.hu/</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>Geonhu</grapheme>
+    <phoneme>/kʌ̹n.hu/</phoneme>
+  </lexeme>
+  <lexeme>
+    <grapheme>geonhu</grapheme>
+    <phoneme>/kʌ̹n.hu/</phoneme>
+  </lexeme>
+
   <!-- Hanyul (한율) -->
   <lexeme>
     <grapheme>한율</grapheme>
