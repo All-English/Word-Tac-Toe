@@ -5368,6 +5368,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateMatchLengthDefault()
       updateRotatingStartersDefault()
       updateEqualRoundsDefault()
+
+      if (preferActiveSession && playerNames.length > 0) {
+        saveActiveSessionPlayers(playerNames, setName)
+      }
     }
 
     // Also load unit settings for this class if available BEFORE saving settings
@@ -5404,6 +5408,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (unitsToApply && unitsToApply.length > 0) {
           applyUnitsToTicTacToe(unitsToApply, curIdToApply)
+          if (setName && window.SharedClassSync?.saveClassUnits) {
+            const canonicals = unitsToApply
+              .map((s) => window.SharedClassSync.toCanonicalUnit(s)?.id)
+              .filter(Boolean)
+            if (canonicals.length > 0) {
+              window.SharedClassSync.saveClassUnits(setName, canonicals, activeSeriesId, chosenUpdatedAt)
+            }
+          }
         }
       } catch (e) {
         console.warn("Error applying units for loaded set:", e)
