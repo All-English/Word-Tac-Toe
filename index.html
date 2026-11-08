@@ -538,20 +538,22 @@
             </div>
 
             <div class="setup-section sync-settings" id="sync-settings-section">
-              <h4 class="h5">Upstash Sync</h4>
+              <h4 class="h5" id="sync-settings-heading">Cloud Sync</h4>
               <label class="field">
-                <span class="label">Upstash REST URL</span>
-                <input type="text" id="upstash-url" name="upstash-url" placeholder="https://...upstash.io">
+                <span class="label">Sync Code</span>
+                <input type="text" id="sync-code-input" name="sync-code" placeholder="e.g. judson-english" autocomplete="off">
               </label>
               <label class="field">
-                <span class="label">Upstash REST Token</span>
-                <input type="password" id="upstash-token" name="upstash-token" placeholder="Paste token here...">
+                <span class="label">4-Digit PIN (Optional)</span>
+                <input type="password" id="sync-pin-input" name="sync-pin" placeholder="Optional 4-digit PIN" maxlength="4" inputmode="numeric" autocomplete="off">
               </label>
-              <div class="sync-actions">
-                <button id="save-sync-btn" class="button outlined small">Save & Sync</button>
+              <div class="sync-actions" style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+                <button id="connect-sync-btn" type="button" class="button outlined small">Connect Existing</button>
+                <button id="create-sync-btn" type="button" class="button outlined small">Create New</button>
+                <button id="disconnect-sync-btn" type="button" class="button outlined small" style="display: none;">Disconnect</button>
                 <span id="sync-status" class="sync-status-msg"></span>
               </div>
-              <p class="field-hint">(Optional) Connecting to Upstash Redis backs up and syncs your saved player lists and game statistics across devices.</p>
+              <p class="field-hint">(Optional) Enter a Sync Code to sync your saved classes, current units, and player rosters across devices.</p>
             </div>
           </div>
         </div>
