@@ -539,13 +539,16 @@
 
             <div class="setup-section sync-settings" id="sync-settings-section">
               <h4 class="h5" id="sync-settings-heading">Cloud Sync</h4>
+              <p style="font-size: 0.73rem; color: var(--text-muted, #94a3b8); line-height: 1.35; margin: 0 0 0.55rem 0;">
+                Pick your own unique Sync Code (e.g. your name or school) to sync class rosters, attendance, and active units in real-time across all your devices and games.
+              </p>
               <label class="field">
-                <span class="label">Sync Code</span>
-                <input type="text" id="sync-code-input" name="sync-code" placeholder="e.g. judson-english" autocomplete="off">
+                <span class="label">Sync Code <span style="font-size: 0.72rem; font-weight: normal; opacity: 0.85;">(choose your own)</span></span>
+                <input type="text" id="sync-code-input" name="sync-code" placeholder="Pick a code (e.g. teacher-sarah)" autocomplete="off">
               </label>
               <label class="field">
-                <span class="label">4-Digit PIN (Optional)</span>
-                <input type="password" id="sync-pin-input" name="sync-pin" placeholder="Optional 4-digit PIN" maxlength="4" inputmode="numeric" autocomplete="off">
+                <span class="label">4-Digit PIN <span style="font-size: 0.72rem; font-weight: normal; opacity: 0.85;">(optional lock)</span></span>
+                <input type="password" id="sync-pin-input" name="sync-pin" placeholder="Optional PIN to protect code" maxlength="4" inputmode="numeric" autocomplete="off">
               </label>
               <div class="sync-actions" style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
                 <button id="connect-sync-btn" type="button" class="button outlined small">Connect Existing</button>
@@ -553,7 +556,9 @@
                 <button id="disconnect-sync-btn" type="button" class="button outlined small" style="display: none;">Disconnect</button>
                 <span id="sync-status" class="sync-status-msg"></span>
               </div>
-              <p class="field-hint">(Optional) Enter a Sync Code to sync your saved classes, current units, and player rosters across devices.</p>
+              <p class="field-hint" style="margin-top: 0.4rem;">
+                First time? Pick a code and click <strong>Create New</strong>.<br>On another device? Enter your code and click <strong>Connect Existing</strong>.
+              </p>
             </div>
           </div>
         </div>
