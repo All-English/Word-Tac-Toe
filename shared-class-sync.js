@@ -2757,6 +2757,23 @@
   };
 
   // ── 7. Unified Curriculum Loader & Delta Overrides ─────────────
+  function getCanonicalLevelId(lvl) {
+    if (!lvl) return '';
+    if (lvl.id) return String(lvl.id);
+    if (lvl.level != null) return `L${lvl.level}`;
+    if (lvl.bookNumber != null) return `L${lvl.bookNumber}`;
+    return String(lvl.name || '');
+  }
+
+  function getCanonicalUnitId(u, levelId = '') {
+    if (!u) return '';
+    if (u.id) return String(u.id);
+    const num = u.unit ?? u.unitNumber;
+    if (num != null && levelId) return `${levelId}U${num}`;
+    if (num != null) return String(num);
+    return String(u.name || u.title || '');
+  }
+
   function computeCurriculumOverrides(curriculaList, baselineData) {
     if (!Array.isArray(curriculaList) || curriculaList.length === 0) return [];
     const baseNorm = baselineData ? CurriculumAdapter.normalize(baselineData) : null;
@@ -2779,20 +2796,20 @@
       } else {
         const masterUnitMap = new Map();
         for (const lvl of (masterSeries.levels || [])) {
-          const lNum = lvl.level ?? lvl.id;
+          const lKey = getCanonicalLevelId(lvl);
           for (const u of (lvl.units || [])) {
-            const uNum = u.unit ?? u.unitNumber ?? u.id;
-            masterUnitMap.set(`${lNum}:${uNum}`, JSON.stringify(u));
+            const uKey = getCanonicalUnitId(u, lKey);
+            masterUnitMap.set(`${lKey}:${uKey}`, JSON.stringify(u));
           }
         }
 
         const diffLevels = [];
         for (const lvl of (s.levels || [])) {
-          const lNum = lvl.level ?? lvl.id;
+          const lKey = getCanonicalLevelId(lvl);
           const diffUnits = [];
           for (const u of (lvl.units || [])) {
-            const uNum = u.unit ?? u.unitNumber ?? u.id;
-            const key = `${lNum}:${uNum}`;
+            const uKey = getCanonicalUnitId(u, lKey);
+            const key = `${lKey}:${uKey}`;
             if (masterUnitMap.get(key) !== JSON.stringify(u)) {
               diffUnits.push(u);
             }
@@ -2852,24 +2869,41 @@
         }
       } else {
         targetSeries.updatedAt = Math.max(targetSeries.updatedAt || 0, ov.updatedAt || 0);
-        const levelByNum = new Map((targetSeries.levels || []).map(l => [String(l.level ?? l.id), l]));
+        const levelByKey = new Map();
+        for (const l of (targetSeries.levels || [])) {
+          const lKey = getCanonicalLevelId(l);
+          if (lKey) levelByKey.set(lKey, l);
+          if (l.id) levelByKey.set(String(l.id), l);
+        }
         for (const ovLvl of parsedLevels) {
-          const lKey = String(ovLvl.level ?? ovLvl.id);
-          const targetLvl = levelByNum.get(lKey);
+          const lKey = getCanonicalLevelId(ovLvl);
+          const targetLvl = levelByKey.get(lKey) || (ovLvl.id ? levelByKey.get(String(ovLvl.id)) : null);
           if (!targetLvl) {
             targetSeries.levels.push(ovLvl);
-            levelByNum.set(lKey, ovLvl);
+            if (lKey) levelByKey.set(lKey, ovLvl);
           } else {
             const unitByIdx = new Map();
             (targetLvl.units || []).forEach((u, idx) => {
-              unitByIdx.set(String(u.unit ?? u.unitNumber ?? u.id), idx);
+              const cId = getCanonicalUnitId(u, lKey);
+              if (cId) unitByIdx.set(cId, idx);
+              if (u.id) unitByIdx.set(String(u.id), idx);
+              if (u.name) unitByIdx.set(`name:${u.name.trim()}`, idx);
             });
             for (const ovUnit of (ovLvl.units || [])) {
-              const uKey = String(ovUnit.unit ?? ovUnit.unitNumber ?? ovUnit.id);
-              if (unitByIdx.has(uKey)) {
-                targetLvl.units[unitByIdx.get(uKey)] = ovUnit;
+              const cId = getCanonicalUnitId(ovUnit, lKey);
+              const existingIdx =
+                (cId && unitByIdx.has(cId)) ? unitByIdx.get(cId) :
+                (ovUnit.id && unitByIdx.has(String(ovUnit.id))) ? unitByIdx.get(String(ovUnit.id)) :
+                (ovUnit.name && unitByIdx.has(`name:${ovUnit.name.trim()}`)) ? unitByIdx.get(`name:${ovUnit.name.trim()}`) :
+                undefined;
+              if (existingIdx !== undefined) {
+                targetLvl.units[existingIdx] = { ...targetLvl.units[existingIdx], ...ovUnit };
               } else {
+                const newIdx = targetLvl.units.length;
                 targetLvl.units.push(ovUnit);
+                if (cId) unitByIdx.set(cId, newIdx);
+                if (ovUnit.id) unitByIdx.set(String(ovUnit.id), newIdx);
+                if (ovUnit.name) unitByIdx.set(`name:${ovUnit.name.trim()}`, newIdx);
               }
             }
           }
