@@ -1238,16 +1238,71 @@
     };
   }
 
+  function deleteClass(className) {
+    const cleanName = (className || '').trim();
+    if (!cleanName) return false;
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const rawSets = localStorage.getItem(SHARED_SETS_KEY);
+        if (rawSets) {
+          const sets = JSON.parse(rawSets) || {};
+          if (sets[cleanName]) {
+            delete sets[cleanName];
+            localStorage.setItem(SHARED_SETS_KEY, JSON.stringify(sets));
+          }
+        }
+
+        const rawProfs = localStorage.getItem(SHARED_CLASS_PROFILES_KEY);
+        if (rawProfs) {
+          const profs = JSON.parse(rawProfs) || {};
+          if (profs[cleanName]) {
+            delete profs[cleanName];
+            localStorage.setItem(SHARED_CLASS_PROFILES_KEY, JSON.stringify(profs));
+          }
+        }
+
+        const rawPf = localStorage.getItem('phonics-flash-classes');
+        if (rawPf) {
+          const pf = JSON.parse(rawPf) || null;
+          if (pf && Array.isArray(pf.classes)) {
+            const origLen = pf.classes.length;
+            pf.classes = pf.classes.filter(c => (c.name || '').trim() !== cleanName && String(c.id || '') !== cleanName);
+            if (pf.classes.length !== origLen) {
+              localStorage.setItem('phonics-flash-classes', JSON.stringify(pf));
+            }
+          }
+        }
+
+        if (localStorage.getItem(SHARED_ACTIVE_CLASS_KEY) === cleanName) {
+          localStorage.removeItem(SHARED_ACTIVE_CLASS_KEY);
+        }
+      } catch (e) {
+        console.warn('[SharedClassSync] Error deleting class from local storage:', e);
+      }
+    }
+
+    pendingDeletedClassNames.add(cleanName);
+    schedulePushToConvex({ replaceAllClasses: true, deleteClassName: cleanName });
+    return true;
+  }
+
   let pushTimer = null;
   let pendingDeletedClassNames = new Set();
+  let pendingReplaceAllClasses = false;
 
   function schedulePushToConvex({ replaceAllClasses = false, deleteClassName = null } = {}) {
     if (deleteClassName) {
       pendingDeletedClassNames.add(deleteClassName);
     }
+    if (replaceAllClasses) {
+      pendingReplaceAllClasses = true;
+    }
     if (pushTimer) clearTimeout(pushTimer);
     pushTimer = setTimeout(() => {
-      pushLocalStateToConvex({ replaceAllClasses });
+      const doReplaceAll = pendingReplaceAllClasses;
+      pendingReplaceAllClasses = false;
+      pushLocalStateToConvex({ replaceAllClasses: doReplaceAll });
     }, 250);
   }
 
@@ -1308,8 +1363,13 @@
     return res;
   }
 
+  const LEGACY_UPSTASH_MIGRATED_KEY = 'ae_legacy_upstash_migrated';
+
   async function pullLegacyUpstashFromBrowserOnce() {
     if (typeof localStorage === 'undefined') return false;
+    if (localStorage.getItem(LEGACY_UPSTASH_MIGRATED_KEY) === 'true') {
+      return false;
+    }
     let url = (localStorage.getItem(UPSTASH_URL_KEY) || '').trim();
     let token = (localStorage.getItem(UPSTASH_TOKEN_KEY) || '').trim();
     if (!url || !token) {
@@ -1321,7 +1381,10 @@
         }
       } catch {}
     }
-    if (!url || !token) return false;
+    if (!url || !token) {
+      localStorage.setItem(LEGACY_UPSTASH_MIGRATED_KEY, 'true');
+      return false;
+    }
     const cleanUrl = url.replace(/\/$/, '');
 
     const getKey = async (k) => {
@@ -1401,8 +1464,15 @@
           }
         }
       }
+      localStorage.setItem(LEGACY_UPSTASH_MIGRATED_KEY, 'true');
+      try {
+        localStorage.removeItem(UPSTASH_URL_KEY);
+        localStorage.removeItem(UPSTASH_TOKEN_KEY);
+        localStorage.removeItem('phonics-flash-upstash-config');
+      } catch {}
       return true;
     } catch {
+      localStorage.setItem(LEGACY_UPSTASH_MIGRATED_KEY, 'true');
       return false;
     }
   }
@@ -1564,7 +1634,29 @@
 
     if (typeof localStorage !== 'undefined' && value !== undefined) {
       try {
-        if (key === SHARED_SETS_KEY && typeof value === 'object') {
+        if (key === SHARED_SETS_KEY && typeof value === 'object' && value !== null) {
+          const oldSets = JSON.parse(localStorage.getItem(SHARED_SETS_KEY) || '{}') || {};
+          const newKeys = new Set(Object.keys(value));
+          for (const oldName of Object.keys(oldSets)) {
+            if (!newKeys.has(oldName)) {
+              const cleanOld = oldName.trim();
+              if (cleanOld) {
+                pendingDeletedClassNames.add(cleanOld);
+                try {
+                  const profs = JSON.parse(localStorage.getItem(SHARED_CLASS_PROFILES_KEY) || '{}') || {};
+                  if (profs[cleanOld]) {
+                    delete profs[cleanOld];
+                    localStorage.setItem(SHARED_CLASS_PROFILES_KEY, JSON.stringify(profs));
+                  }
+                  const pf = JSON.parse(localStorage.getItem('phonics-flash-classes') || 'null');
+                  if (pf && Array.isArray(pf.classes)) {
+                    pf.classes = pf.classes.filter(c => (c.name || '').trim() !== cleanOld);
+                    localStorage.setItem('phonics-flash-classes', JSON.stringify(pf));
+                  }
+                } catch {}
+              }
+            }
+          }
           localStorage.setItem(SHARED_SETS_KEY, JSON.stringify(value));
         } else if (key === SHARED_CLASS_PROFILES_KEY && typeof value === 'object') {
           localStorage.setItem(SHARED_CLASS_PROFILES_KEY, JSON.stringify(value));
@@ -3066,8 +3158,11 @@
     readSharedSyncCookie,
     writeSharedSyncCookie,
     reconcileCookieWithLocalStorage,
+    deleteClass,
     fetchUpstash,
     syncUpstash,
+    fetchFromCloud: fetchUpstash,
+    syncToCloud: syncUpstash,
     loadAllClasses,
     saveClassUnits,
     SHARED_HIDDEN_BOOKS_KEY,

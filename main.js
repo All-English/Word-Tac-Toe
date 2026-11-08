@@ -5390,9 +5390,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!confirm(`Are you sure you want to delete the list "${setName}"?`)) {
       return
     }
-    const sets = getPlayerSets()
-    delete sets[setName]
-    setPlayerSets(sets)
+    if (window.SharedClassSync?.deleteClass) {
+      window.SharedClassSync.deleteClass(setName)
+    } else {
+      const sets = getPlayerSets()
+      delete sets[setName]
+      setPlayerSets(sets)
+    }
     populateSetsDialog() // Refresh the list
   }
 
