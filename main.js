@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentLoadedSetName = null
   let lastReadWordText = ""
   let lastReadWordAudio = null
+  let lastPlayedWordUrl = null
   let lastReadCellIndex = null
   let cellPronounceHighlightTimeout = null
 
@@ -381,6 +382,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const playAgainBtn = document.getElementById("play-again-btn")
   const closeDialogBtn = document.getElementById("close-dialog-btn")
   const pronounceWordsToggle = document.getElementById("pronounceWordsToggle")
+  const wordVoiceModeSelect = document.getElementById("wordVoiceModeSelect")
   const gameModeSelector = document.getElementById("gameModeSelector")
   const randomizeGameModeBtn = document.getElementById("randomizeGameModeBtn")
   const survivorOptionsGroup =
@@ -471,7 +473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function resetLastReadWord() {
     stopLastReadWordAudio()
-    if (lastReadWordAudio && lastReadWordAudio.src) {
+    if (lastReadWordAudio && lastReadWordAudio.src && lastReadWordAudio.src.startsWith("blob:")) {
       try {
         URL.revokeObjectURL(lastReadWordAudio.src)
       } catch (e) {}
@@ -2758,6 +2760,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  function precacheBoardWordAudios() {
+    if (!gameState.board || !Array.isArray(gameState.board)) return
+    const mode = (wordVoiceModeSelect?.value || localStorage.getItem("word_voice_mode") || "mixed").toLowerCase()
+    if (typeof window !== "undefined" && window.SharedClassSync?.getWordAudioUrls) {
+      const words = [...new Set(gameState.board.map((cell) => (typeof cell === "string" ? cell : cell?.word || "")).filter(Boolean))]
+      for (const word of words) {
+        if (word.length <= 1) continue
+        const urls = window.SharedClassSync.getWordAudioUrls(word, { mode })
+        for (const url of urls) {
+          try {
+            const a = new Audio()
+            a.preload = "auto"
+            a.src = url
+          } catch (e) {}
+        }
+      }
+    }
+  }
+
   async function announceCurrentPlayerTurn() {
     if (gameState.isMuted || !gameState.players || gameState.players.length === 0) return
 
@@ -2918,6 +2939,51 @@ document.addEventListener("DOMContentLoaded", async () => {
       return new Promise((resolve) => setTimeout(resolve, 300))
     }
 
+    // --- 1. Pre-downloaded CDN & Official Word Audio ---
+    if (isWord) {
+      const mode = (wordVoiceModeSelect?.value || localStorage.getItem("word_voice_mode") || "mixed").toLowerCase()
+      let candidateUrls = []
+      if (typeof window !== "undefined" && window.SharedClassSync?.getWordAudioUrls) {
+        candidateUrls = window.SharedClassSync.getWordAudioUrls(text.trim(), { mode })
+      }
+
+      if (candidateUrls && candidateUrls.length > 0) {
+        const validUrls = candidateUrls.filter((u) => u !== lastPlayedWordUrl)
+        const chosenUrl =
+          validUrls.length > 0
+            ? validUrls[Math.floor(Math.random() * validUrls.length)]
+            : candidateUrls[Math.floor(Math.random() * candidateUrls.length)]
+
+        if (chosenUrl) {
+          lastPlayedWordUrl = chosenUrl
+          try {
+            const audio = new Audio(chosenUrl)
+            audio.preload = "auto"
+
+            if (lastReadWordAudio && lastReadWordAudio.src && lastReadWordAudio.src.startsWith("blob:")) {
+              try {
+                URL.revokeObjectURL(lastReadWordAudio.src)
+              } catch (e) {}
+            }
+            lastReadWordAudio = audio
+            lastReadWordText = text.trim()
+
+            await new Promise((resolve) => {
+              audio.onended = () => resolve()
+              audio.onerror = () => resolve()
+              audio.play().catch((e) => {
+                console.error(`Could not play word audio: ${e}`)
+                resolve()
+              })
+            })
+            return
+          } catch (e) {
+            console.debug("Pre-downloaded word audio playback failed:", e)
+          }
+        }
+      }
+    }
+
     // --- Primary Method: Try ElevenLabs API ---
     if (userApiKey) {
       const availableVoices = englishVoices.filter(
@@ -2968,7 +3034,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const audio = new Audio(audioUrl)
 
           if (isWord) {
-            if (lastReadWordAudio && lastReadWordAudio.src) {
+            if (lastReadWordAudio && lastReadWordAudio.src && lastReadWordAudio.src.startsWith("blob:")) {
               try {
                 URL.revokeObjectURL(lastReadWordAudio.src)
               } catch (e) {}
@@ -3047,7 +3113,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (isWord) {
-      if (lastReadWordAudio && lastReadWordAudio.src) {
+      if (lastReadWordAudio && lastReadWordAudio.src && lastReadWordAudio.src.startsWith("blob:")) {
         try {
           URL.revokeObjectURL(lastReadWordAudio.src)
         } catch (e) {}
@@ -4249,6 +4315,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       pendingTurnAnnouncementTimeout = null
     }
     precachePlayerTurnAudios()
+    precacheBoardWordAudios()
     announceCurrentPlayerTurnWithDelay(500)
   }
 
@@ -5696,6 +5763,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateApiFieldVisibility()
     saveSettings()
   })
+  if (wordVoiceModeSelect) {
+    const savedWordMode = localStorage.getItem("word_voice_mode") || "mixed"
+    wordVoiceModeSelect.value = savedWordMode
+    wordVoiceModeSelect.addEventListener("change", (e) => {
+      localStorage.setItem("word_voice_mode", e.target.value)
+    })
+  }
   muteSoundsToggle.addEventListener("change", () => {
     gameState = { ...gameState, isMuted: muteSoundsToggle.checked }
     if (gameState.isMuted) {
