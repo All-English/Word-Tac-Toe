@@ -28,6 +28,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   let playingTurnAudio = null
   let pendingTurnAnnouncementTimeout = null
   let currentLoadedSetName = null
+  let lastReadWordText = ""
+  let lastReadWordAudio = null
+  let lastReadCellIndex = null
+  let cellPronounceHighlightTimeout = null
 
   const sounds = {
     click: new Audio("sounds/click.mp3"),
@@ -447,19 +451,125 @@ document.addEventListener("DOMContentLoaded", async () => {
     gameDialog.close()
   }
 
-  const handleReset = () => enterReorderMode()
+  function stopLastReadWordAudio() {
+    if (cellPronounceHighlightTimeout) {
+      clearTimeout(cellPronounceHighlightTimeout)
+      cellPronounceHighlightTimeout = null
+    }
+    if (lastReadCellIndex !== null) {
+      const cell = gameBoard?.querySelector(`[data-index='${lastReadCellIndex}']`)
+      if (cell) cell.classList.remove("pronouncing")
+    }
+    if (lastReadWordAudio && !lastReadWordAudio.paused) {
+      lastReadWordAudio.pause()
+      lastReadWordAudio.currentTime = 0
+    }
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel()
+    }
+  }
+
+  function resetLastReadWord() {
+    stopLastReadWordAudio()
+    if (lastReadWordAudio && lastReadWordAudio.src) {
+      try {
+        URL.revokeObjectURL(lastReadWordAudio.src)
+      } catch (e) {}
+    }
+    lastReadWordAudio = null
+    lastReadWordText = ""
+    lastReadCellIndex = null
+  }
+
+  function repeatLastPlayedSound() {
+    if (gameState.isMuted) return
+    if (isMoveProcessing) return
+    if (!lastReadWordText && !lastReadWordAudio) return
+
+    stopAllTurnVoices()
+    if (pendingTurnAnnouncementTimeout) {
+      clearTimeout(pendingTurnAnnouncementTimeout)
+      pendingTurnAnnouncementTimeout = null
+    }
+
+    const cell =
+      lastReadCellIndex !== null
+        ? gameBoard?.querySelector(`[data-index='${lastReadCellIndex}']`)
+        : null
+
+    if (cell) {
+      if (cellPronounceHighlightTimeout) {
+        clearTimeout(cellPronounceHighlightTimeout)
+      }
+      cell.classList.add("pronouncing")
+    }
+
+    const removeHighlight = () => {
+      if (cell) cell.classList.remove("pronouncing")
+      if (cellPronounceHighlightTimeout) {
+        clearTimeout(cellPronounceHighlightTimeout)
+        cellPronounceHighlightTimeout = null
+      }
+    }
+
+    if (lastReadWordAudio) {
+      lastReadWordAudio.pause()
+      lastReadWordAudio.currentTime = 0
+
+      cellPronounceHighlightTimeout = setTimeout(removeHighlight, 1500)
+
+      const handleEnd = () => {
+        removeHighlight()
+        lastReadWordAudio.removeEventListener("ended", handleEnd)
+        lastReadWordAudio.removeEventListener("error", handleEnd)
+      }
+      lastReadWordAudio.addEventListener("ended", handleEnd)
+      lastReadWordAudio.addEventListener("error", handleEnd)
+
+      lastReadWordAudio.play().catch((e) => {
+        console.error("Error replaying audio:", e)
+        removeHighlight()
+        if (lastReadWordText) {
+          speakWithBrowser(lastReadWordText)
+        }
+      })
+    } else if (lastReadWordText) {
+      cellPronounceHighlightTimeout = setTimeout(removeHighlight, 1500)
+      speakWithBrowser(lastReadWordText).finally(removeHighlight)
+    }
+  }
+
+  const handleReset = () => {
+    resetLastReadWord()
+    enterReorderMode()
+  }
 
   const handlePlayAgain = () => {
     gameDialog.close()
+    resetLastReadWord()
     enterReorderMode()
   }
   const handleKeydown = (e) => {
+    if (
+      e.target.matches("input, textarea, select") ||
+      e.target.isContentEditable
+    ) {
+      return
+    }
+
     if (e.key === "Backspace") {
       undoLastMove()
+    } else if (
+      e.code === "ShiftRight" ||
+      (e.key === "Shift" && e.location === 2)
+    ) {
+      e.preventDefault()
+      repeatLastPlayedSound()
     }
   }
 
   const handleBackToSettings = () => {
+    resetLastReadWord()
     removeGameEventListeners()
     isOrderLocked = false
 
@@ -1170,6 +1280,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Silence active turn announcement and prevent any pending ones
     currentTurnCellClicked = true
     stopAllTurnVoices()
+    stopLastReadWordAudio()
     if (pendingTurnAnnouncementTimeout) {
       clearTimeout(pendingTurnAnnouncementTimeout)
       pendingTurnAnnouncementTimeout = null
@@ -1187,7 +1298,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       cell.classList.add("pronouncing")
 
       try {
-        await speak(cell.textContent)
+        lastReadWordText = cell.textContent.trim()
+        lastReadCellIndex = index
+        await speak(cell.textContent, true)
         // Brief breath delay before transition (allows user to absorb pronunciation)
         await new Promise((resolve) => setTimeout(resolve, 150))
       } catch (e) {
@@ -1432,6 +1545,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Re-announce the current player turn since it was reverted
     currentTurnCellClicked = false
     stopAllTurnVoices()
+    stopLastReadWordAudio()
+    const remainingHistory = gameState.moveHistory.slice(0, -1)
+    if (remainingHistory.length > 0) {
+      const prevMove = remainingHistory[remainingHistory.length - 1]
+      lastReadWordText = prevMove.word || ""
+      lastReadWordAudio = prevMove.wordAudio || null
+      lastReadCellIndex = prevMove.index !== undefined ? prevMove.index : null
+    } else {
+      resetLastReadWord()
+    }
     if (pendingTurnAnnouncementTimeout) {
       clearTimeout(pendingTurnAnnouncementTimeout)
       pendingTurnAnnouncementTimeout = null
@@ -1502,6 +1625,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const move = {
       index: index,
       player: gameState.currentPlayer,
+      word: lastReadWordText,
+      wordAudio: lastReadWordAudio,
       scoredLines: [],
       blockPoints: 0,
       conquestState:
@@ -2678,7 +2803,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     speak(`${playerName}'s turn`)
   }
 
-  async function speak(text) {
+  async function speak(text, isWord = false) {
     if (gameState.isMuted) return Promise.resolve()
     if (text.trim().length <= 1) {
       playSound("click")
@@ -2733,6 +2858,17 @@ document.addEventListener("DOMContentLoaded", async () => {
           const audioBlob = await response.blob()
           const audioUrl = URL.createObjectURL(audioBlob)
           const audio = new Audio(audioUrl)
+
+          if (isWord) {
+            if (lastReadWordAudio && lastReadWordAudio.src) {
+              try {
+                URL.revokeObjectURL(lastReadWordAudio.src)
+              } catch (e) {}
+            }
+            lastReadWordAudio = audio
+            lastReadWordText = text.trim()
+          }
+
           await new Promise((resolve) => {
             audio.onended = () => resolve()
             audio.onerror = () => resolve()
@@ -2802,6 +2938,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
+    if (isWord) {
+      if (lastReadWordAudio && lastReadWordAudio.src) {
+        try {
+          URL.revokeObjectURL(lastReadWordAudio.src)
+        } catch (e) {}
+      }
+      lastReadWordAudio = null
+      lastReadWordText = text.trim()
+    }
+
     // --- Fallback Method: Browser Speech Synthesis ---
     // This code now runs if userApiKey is missing OR if the API call fails.
     await speakWithBrowser(text)
@@ -2842,6 +2988,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Ascending musical pitch offsets in cents (100 cents = 1 semitone)
   // Pentatonic intervals: 0 (Root), 200 (+1 whole step), 400 (+2 whole steps / Maj 3rd), 700 (5th), etc.
   const SCORE_PITCH_STEPS = [0, 200, 400, 700, 900, 1200, 1400, 1600]
+  const BLOCK_PITCH_STEPS = [0, 200, 400, 700, 900, 1200, 1400, 1600]
 
   async function playScoreSequentially(times) {
     if (gameState.isMuted || times <= 0) return Promise.resolve()
@@ -2939,6 +3086,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         for (let i = 0; i < times; i++) {
           const source = ctx.createBufferSource()
           source.buffer = buffer
+
+          const detuneCents =
+            BLOCK_PITCH_STEPS[i] !== undefined
+              ? BLOCK_PITCH_STEPS[i]
+              : i * 200
+          source.detune.value = detuneCents
+
           source.connect(ctx.destination)
 
           const startTime = now + i * stepDelay
@@ -2963,11 +3117,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       })
     }
 
-    // Fallback: HTML5 Audio
+    // Fallback: HTML5 Audio with preservesPitch=false & playbackRate
     for (let i = 0; i < times; i++) {
       await new Promise((resolve) => {
         const audio = sounds.block ? sounds.block.cloneNode() : null
         if (!audio) return resolve()
+
+        const cents =
+          BLOCK_PITCH_STEPS[i] !== undefined ? BLOCK_PITCH_STEPS[i] : i * 200
+        audio.preservesPitch = false
+        audio.playbackRate = Math.pow(2, cents / 1200)
+
         audio.onended = () => resolve()
         audio.onerror = () => resolve()
         audio.play().catch((e) => {
@@ -3836,6 +3996,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- SETUP PHASE FUNCTIONS (Imperative, run before game starts) ---
 
   function initGame(isFromSetup) {
+    resetLastReadWord()
     isMoveProcessing = false
     if (gameBoard) gameBoard.classList.remove("processing-move")
     // Clear any lingering pulse animations from the previous game
