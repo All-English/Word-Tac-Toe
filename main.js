@@ -151,11 +151,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     setSectionCollapsed(sectionEl, toggleBtn, isCurrentlyExpanded)
   }
 
-  apiSettingsToggle?.addEventListener("click", () => {
+  apiSettingsToggle?.addEventListener("click", (e) => {
+    e.stopPropagation()
     toggleSectionCollapsed(apiSettingsSection, apiSettingsToggle)
   })
 
-  syncSettingsToggle?.addEventListener("click", () => {
+  const apiSettingsHeader = document.querySelector("#api-settings-section > .h5")
+  apiSettingsHeader?.addEventListener("click", () => {
+    toggleSectionCollapsed(apiSettingsSection, apiSettingsToggle)
+  })
+
+  syncSettingsToggle?.addEventListener("click", (e) => {
+    e.stopPropagation()
+    toggleSectionCollapsed(syncSettingsSection, syncSettingsToggle)
+  })
+
+  const syncSettingsHeader = document.querySelector("#sync-settings-section > .h5")
+  syncSettingsHeader?.addEventListener("click", () => {
     toggleSectionCollapsed(syncSettingsSection, syncSettingsToggle)
   })
 

@@ -490,49 +490,16 @@ dialog.manage-books-dialog {
   padding-block: var(--size-3);
 }
 
-.setup-section.collapsible > .setup-section-header {
-  margin: 0;
-  padding: 0;
-  border-bottom: none;
-  text-align: left;
+.setup-section.collapsible > .h5 {
+  cursor: pointer;
+  user-select: none;
   transition: margin-block-end 0.25s ease, padding-bottom 0.25s ease;
 }
 
-.setup-section.collapsible.expanded > .setup-section-header {
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: var(--size-fluid-1);
-  margin-block-end: var(--size-3);
-}
-
-.setup-section-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--size-2);
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  font-size: var(--font-size-fluid-1, 1.15rem);
-  font-weight: 600;
-  color: var(--text-color-1);
-  cursor: pointer;
-  text-align: left;
-  user-select: none;
-}
-
-.setup-section-toggle:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 4px;
-  border-radius: var(--radius-2);
-}
-
-.setup-section-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: var(--size-2);
-  flex-wrap: wrap;
+.setup-section.collapsible:not(.expanded) > .h5 {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-block-end: 0;
 }
 
 .setup-section-badge {
@@ -549,7 +516,7 @@ dialog.manage-books-dialog {
   border: 1px solid light-dark(var(--green-3), var(--green-8));
 }
 
-.setup-section-toggle .chevron-icon {
+.setup-section.collapsible .collapse-btn .chevron-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -558,7 +525,7 @@ dialog.manage-books-dialog {
   flex-shrink: 0;
 }
 
-.setup-section.collapsible.expanded .setup-section-toggle .chevron-icon {
+.setup-section.collapsible.expanded .collapse-btn .chevron-icon {
   transform: rotate(180deg);
 }
 
@@ -657,7 +624,9 @@ dialog.manage-books-dialog {
 .game-mode-setup>.h5,
 .game-rules>.h5,
 .audio-settings>.h5,
-.word-selection>.h5 {
+.word-selection>.h5,
+.api-settings>.h5,
+.sync-settings>.h5 {
   display: flex;
   justify-content: center;
   align-items: center;
