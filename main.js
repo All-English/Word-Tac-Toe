@@ -118,16 +118,66 @@ document.addEventListener("DOMContentLoaded", async () => {
     "var(--radius-drawn-6)",
   ]
 
-  // --- API KEY MANAGEMENT ---
+  // --- API KEY & COLLAPSIBLE SECTIONS MANAGEMENT ---
 
   const apiKeyInput = document.getElementById("elevenlabs-api-key")
   const saveApiKeyBtn = document.getElementById("save-api-key-btn")
+  const removeApiKeyBtn = document.getElementById("remove-api-key-btn")
   const apiKeyStatus = document.getElementById("api-key-status")
+  const apiSettingsSection = document.getElementById("api-settings-section")
+  const apiSettingsToggle = document.getElementById("api-settings-toggle")
+  const apiKeyBadge = document.getElementById("api-key-badge")
+
+  const syncSettingsSection = document.getElementById("sync-settings-section")
+  const syncSettingsToggle = document.getElementById("sync-settings-toggle")
+  const syncSettingsHeading = document.getElementById("sync-settings-heading")
+  const syncActiveBadge = document.getElementById("sync-active-badge")
   let userApiKey = ""
+
+  function setSectionCollapsed(sectionEl, toggleBtn, collapse) {
+    if (!sectionEl || !toggleBtn) return
+    if (collapse) {
+      sectionEl.classList.remove("expanded")
+      toggleBtn.setAttribute("aria-expanded", "false")
+    } else {
+      sectionEl.classList.add("expanded")
+      toggleBtn.setAttribute("aria-expanded", "true")
+    }
+  }
+
+  function toggleSectionCollapsed(sectionEl, toggleBtn) {
+    if (!sectionEl || !toggleBtn) return
+    const isCurrentlyExpanded = sectionEl.classList.contains("expanded")
+    setSectionCollapsed(sectionEl, toggleBtn, isCurrentlyExpanded)
+  }
+
+  apiSettingsToggle?.addEventListener("click", () => {
+    toggleSectionCollapsed(apiSettingsSection, apiSettingsToggle)
+  })
+
+  syncSettingsToggle?.addEventListener("click", () => {
+    toggleSectionCollapsed(syncSettingsSection, syncSettingsToggle)
+  })
 
   // ElevenLabs Pronunciation Dictionary (Korean Player Names)
   const ELEVENLABS_PRONUNCIATION_DICT_ID = "sKcMTMc7IZdOIqGSuKGL"
   const ELEVENLABS_PRONUNCIATION_VERSION_ID = "lBWAKvEKQsfx4Ajakhf7"
+
+  function clearApiKeyCookiesAndStorage() {
+    localStorage.removeItem("elevenlabs_api_key")
+    localStorage.removeItem("phonics-flash-elevenlabs-key")
+    if (window.SharedClassSync?.setSharedApiKey) {
+      window.SharedClassSync.setSharedApiKey("")
+    }
+    const cookieNames = ["elevenlabs_api_key", "phonics-flash-elevenlabs-key", "elKey"]
+    const rootDomain = window.SharedClassSync?.getRootDomain ? window.SharedClassSync.getRootDomain() : ""
+    cookieNames.forEach((cName) => {
+      document.cookie = `${cName}=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+      if (rootDomain) {
+        document.cookie = `${cName}=; path=/; domain=${rootDomain}; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+      }
+    })
+  }
 
   // 1. On page load, try to get the key from localStorage
   const savedKey = localStorage.getItem("elevenlabs_api_key")
@@ -142,14 +192,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const key = apiKeyInput?.value.trim() || ""
 
       if (!key) {
-        localStorage.removeItem("elevenlabs_api_key")
-        window.SharedClassSync?.setSharedApiKey?.("")
+        clearApiKeyCookiesAndStorage()
         userApiKey = ""
         if (apiKeyStatus) {
-          apiKeyStatus.textContent = "API Key cleared."
+          apiKeyStatus.textContent = "API Key cleared from storage and cookies."
           apiKeyStatus.className = "api-status-msg success"
         }
         resetCachedTurnVoices()
+        updateApiFieldVisibility()
+        setSectionCollapsed(apiSettingsSection, apiSettingsToggle, false)
         return
       }
 
@@ -176,6 +227,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
           resetCachedTurnVoices()
           precachePlayerTurnAudios()
+          updateApiFieldVisibility()
         } else {
           throw new Error("Invalid API key")
         }
@@ -188,6 +240,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       } finally {
         saveApiKeyBtn.disabled = false
       }
+    })
+  }
+
+  // 3. Click handler to remove ElevenLabs API Key from browser storage & cookies
+  if (removeApiKeyBtn) {
+    removeApiKeyBtn.addEventListener("click", () => {
+      clearApiKeyCookiesAndStorage()
+      userApiKey = ""
+      if (apiKeyInput) apiKeyInput.value = ""
+      if (apiKeyStatus) {
+        apiKeyStatus.textContent = "API key removed from storage and cookies."
+        apiKeyStatus.className = "api-status-msg"
+      }
+      resetCachedTurnVoices()
+      updateApiFieldVisibility()
+      setSectionCollapsed(apiSettingsSection, apiSettingsToggle, false)
     })
   }
 
@@ -3067,7 +3135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         switch (errorStatus) {
           case "invalid_api_key":
-            localStorage.removeItem("elevenlabs_api_key")
+            clearApiKeyCookiesAndStorage()
             userApiKey = ""
             apiKeyInput.value = ""
             showSnackbar("API key is invalid. Please enter a new one.")
@@ -5437,29 +5505,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function updateApiFieldVisibility() {
-    const apiSettingsSection = document.getElementById("api-settings-section")
     if (apiSettingsSection) {
-      const isPronunciationOn = pronounceWordsToggle.checked
-      // Only show the section if pronunciation is on AND we don't have a key
-      const shouldShow = isPronunciationOn && !userApiKey
-      apiSettingsSection.style.display = shouldShow ? "block" : "none"
+      apiSettingsSection.style.display = "block"
+      const hasKey = Boolean(userApiKey)
+
+      if (removeApiKeyBtn) {
+        removeApiKeyBtn.style.display = hasKey ? "inline-flex" : "none"
+      }
+
+      if (apiKeyBadge) {
+        apiKeyBadge.style.display = hasKey ? "inline-flex" : "none"
+        apiKeyBadge.textContent = "Key Saved"
+      }
+
+      // Collapse if an API key is present, expand if no key
+      setSectionCollapsed(apiSettingsSection, apiSettingsToggle, hasKey)
     }
     updateSyncFieldVisibility()
   }
 
   function updateSyncFieldVisibility() {
-    const syncSettingsSection = document.getElementById("sync-settings-section")
-    const heading = document.getElementById("sync-settings-heading")
-    const disconnectBtn = document.getElementById("disconnect-sync-btn")
     const cfg = window.SharedClassSync?.getSyncConfig ? window.SharedClassSync.getSyncConfig() : { syncCode: "", pin: "" }
+    const hasSync = Boolean(cfg.syncCode)
+    const disconnectBtn = document.getElementById("disconnect-sync-btn")
+
     if (syncSettingsSection) {
       syncSettingsSection.style.display = "block"
+      // Collapse when a sync code is in use, expand when not
+      setSectionCollapsed(syncSettingsSection, syncSettingsToggle, hasSync)
     }
-    if (heading) {
-      heading.textContent = cfg.syncCode ? `Cloud Sync (${cfg.syncCode})` : "Cloud Sync"
+
+    if (syncSettingsHeading) {
+      syncSettingsHeading.textContent = hasSync ? `Cloud Sync (${cfg.syncCode})` : "Cloud Sync"
     }
+
+    if (syncActiveBadge) {
+      syncActiveBadge.style.display = hasSync ? "inline-flex" : "none"
+      syncActiveBadge.textContent = "Connected"
+    }
+
     if (disconnectBtn) {
-      disconnectBtn.style.display = cfg.syncCode ? "inline-flex" : "none"
+      disconnectBtn.style.display = hasSync ? "inline-flex" : "none"
     }
   }
 

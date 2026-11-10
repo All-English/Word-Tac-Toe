@@ -227,7 +227,7 @@ main {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-round);
-  padding: var(--size-2) var(--size-4);
+  padding: var(--size-2);
   box-shadow: 0 8px 30px light-dark(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.6));
   width: auto;
   max-width: calc(100vw - var(--size-6));
@@ -478,6 +478,119 @@ dialog.manage-books-dialog {
   &.error {
     color: light-dark(var(--red-7), var(--red-4));
   }
+}
+
+/* --- Collapsible Setup Sections (API Settings & Cloud Sync) --- */
+.setup-section.collapsible {
+  gap: 0;
+  transition: padding 0.25s ease;
+}
+
+.setup-section.collapsible:not(.expanded) {
+  padding-block: var(--size-3);
+}
+
+.setup-section.collapsible > .setup-section-header {
+  margin: 0;
+  padding: 0;
+  border-bottom: none;
+  text-align: left;
+  transition: margin-block-end 0.25s ease, padding-bottom 0.25s ease;
+}
+
+.setup-section.collapsible.expanded > .setup-section-header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: var(--size-fluid-1);
+  margin-block-end: var(--size-3);
+}
+
+.setup-section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-2);
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--font-size-fluid-1, 1.15rem);
+  font-weight: 600;
+  color: var(--text-color-1);
+  cursor: pointer;
+  text-align: left;
+  user-select: none;
+}
+
+.setup-section-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-2);
+}
+
+.setup-section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  flex-wrap: wrap;
+}
+
+.setup-section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  background-color: light-dark(var(--green-1), var(--green-10));
+  color: light-dark(var(--green-8), var(--green-3));
+  border: 1px solid light-dark(var(--green-3), var(--green-8));
+}
+
+.setup-section-toggle .chevron-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color-2);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.setup-section.collapsible.expanded .setup-section-toggle .chevron-icon {
+  transform: rotate(180deg);
+}
+
+/* CSS Grid Expand/Collapse Animation */
+.setup-section.collapsible .collapsible-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0.3s;
+  visibility: hidden;
+}
+
+.setup-section.collapsible.expanded .collapsible-wrapper {
+  grid-template-rows: 1fr;
+  visibility: visible;
+}
+
+.setup-section.collapsible .collapsible-content {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-3);
+}
+
+.button.danger {
+  color: light-dark(var(--red-7), var(--red-3));
+  border-color: light-dark(var(--red-6), var(--red-5));
+}
+
+.button.danger:hover {
+  background-color: light-dark(var(--red-1), oklch(0.3 0.1 25 / 0.3));
 }
 
 .button-group {

@@ -400,20 +400,76 @@
               </div>
             </div>
 
-            <div class="setup-section api-settings" id="api-settings-section">
-              <h4 class="h5">API Settings</h4>
-              <label class="field" id="api-key-field">
-                <span class="label">ElevenLabs API Key</span>
-                <input type="password" id="elevenlabs-api-key" name="elevenlabs-api-key" autocomplete="off"
-                  placeholder="Paste your key here...">
-              </label>
-              <div class="api-actions">
-                <button id="save-api-key-btn" class="button outlined small">Save & Verify</button>
-                <span id="api-key-status" class="api-status-msg"></span>
+            <div class="setup-section api-settings collapsible" id="api-settings-section">
+              <h4 class="h5 setup-section-header">
+                <button type="button" class="setup-section-toggle" id="api-settings-toggle" aria-expanded="false" aria-controls="api-settings-collapse">
+                  <span class="setup-section-title-wrap">
+                    <span class="setup-section-title">API Settings</span>
+                    <span class="setup-section-badge" id="api-key-badge" style="display: none;">Key Saved</span>
+                  </span>
+                  <span class="chevron-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </span>
+                </button>
+              </h4>
+              <div id="api-settings-collapse" class="collapsible-wrapper" role="region" aria-labelledby="api-settings-toggle">
+                <div class="collapsible-content">
+                  <label class="field" id="api-key-field">
+                    <span class="label">ElevenLabs API Key</span>
+                    <input type="password" id="elevenlabs-api-key" name="elevenlabs-api-key" autocomplete="off"
+                      placeholder="Paste your key here...">
+                  </label>
+                  <div class="api-actions">
+                    <button id="save-api-key-btn" type="button" class="button outlined small">Save & Verify</button>
+                    <button id="remove-api-key-btn" type="button" class="button outlined small danger" style="display: none;">Remove Key</button>
+                    <span id="api-key-status" class="api-status-msg"></span>
+                  </div>
+                  <p class="field-hint">(Optional) An ElevenLabs API key is needed for a high quality voice. <br> Your key is
+                    stored securely in your browser and never leaves your computer.</p>
+                </div>
               </div>
-              <p class="field-hint">(Optional) An ElevenLabs API key is needed for a high quality voice. <br> Your key is
-                stored
-                securely in your browser and never leaves your computer.</p>
+            </div>
+
+            <div class="setup-section sync-settings collapsible" id="sync-settings-section">
+              <h4 class="h5 setup-section-header">
+                <button type="button" class="setup-section-toggle" id="sync-settings-toggle" aria-expanded="false" aria-controls="sync-settings-collapse">
+                  <span class="setup-section-title-wrap">
+                    <span class="setup-section-title" id="sync-settings-heading">Cloud Sync</span>
+                    <span class="setup-section-badge" id="sync-active-badge" style="display: none;">Connected</span>
+                  </span>
+                  <span class="chevron-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </span>
+                </button>
+              </h4>
+              <div id="sync-settings-collapse" class="collapsible-wrapper" role="region" aria-labelledby="sync-settings-toggle">
+                <div class="collapsible-content">
+                  <p style="font-size: 0.73rem; color: var(--text-muted, #94a3b8); line-height: 1.35; margin: 0 0 0.55rem 0;">
+                    Pick your own unique Sync Code (e.g. your name or school) to sync class rosters, attendance, and active units in real-time across all your devices and games.
+                  </p>
+                  <label class="field">
+                    <span class="label">Sync Code <span style="font-size: 0.72rem; font-weight: normal; opacity: 0.85;">(choose your own)</span></span>
+                    <input type="text" id="sync-code-input" name="sync-code" placeholder="Pick a code (e.g. teacher-sarah)" autocomplete="off">
+                  </label>
+                  <label class="field">
+                    <span class="label">4-Digit PIN <span style="font-size: 0.72rem; font-weight: normal; opacity: 0.85;">(optional lock)</span></span>
+                    <input type="password" id="sync-pin-input" name="sync-pin" placeholder="Optional PIN to protect code" maxlength="4" inputmode="numeric" autocomplete="off">
+                  </label>
+                  <div class="sync-actions" style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+                    <button id="connect-sync-btn" type="button" class="button outlined small">Connect Existing</button>
+                    <button id="create-sync-btn" type="button" class="button outlined small">Create New</button>
+                    <button id="disconnect-sync-btn" type="button" class="button outlined small" style="display: none;">Disconnect</button>
+                    <span id="sync-status" class="sync-status-msg"></span>
+                  </div>
+                  <p class="field-hint" style="margin-top: 0.4rem;">
+                    First time? Pick a code and click <strong>Create New</strong>.<br>On another device? Enter your code and click <strong>Connect Existing</strong>.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -543,30 +599,6 @@
                   </select>
                 </label>
               </div>
-            </div>
-
-            <div class="setup-section sync-settings" id="sync-settings-section">
-              <h4 class="h5" id="sync-settings-heading">Cloud Sync</h4>
-              <p style="font-size: 0.73rem; color: var(--text-muted, #94a3b8); line-height: 1.35; margin: 0 0 0.55rem 0;">
-                Pick your own unique Sync Code (e.g. your name or school) to sync class rosters, attendance, and active units in real-time across all your devices and games.
-              </p>
-              <label class="field">
-                <span class="label">Sync Code <span style="font-size: 0.72rem; font-weight: normal; opacity: 0.85;">(choose your own)</span></span>
-                <input type="text" id="sync-code-input" name="sync-code" placeholder="Pick a code (e.g. teacher-sarah)" autocomplete="off">
-              </label>
-              <label class="field">
-                <span class="label">4-Digit PIN <span style="font-size: 0.72rem; font-weight: normal; opacity: 0.85;">(optional lock)</span></span>
-                <input type="password" id="sync-pin-input" name="sync-pin" placeholder="Optional PIN to protect code" maxlength="4" inputmode="numeric" autocomplete="off">
-              </label>
-              <div class="sync-actions" style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
-                <button id="connect-sync-btn" type="button" class="button outlined small">Connect Existing</button>
-                <button id="create-sync-btn" type="button" class="button outlined small">Create New</button>
-                <button id="disconnect-sync-btn" type="button" class="button outlined small" style="display: none;">Disconnect</button>
-                <span id="sync-status" class="sync-status-msg"></span>
-              </div>
-              <p class="field-hint" style="margin-top: 0.4rem;">
-                First time? Pick a code and click <strong>Create New</strong>.<br>On another device? Enter your code and click <strong>Connect Existing</strong>.
-              </p>
             </div>
           </div>
         </div>
