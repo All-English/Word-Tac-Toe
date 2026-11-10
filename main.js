@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- STATE ---
   let gameState = {
     currentView: "setup",
+    soundFx: true,
+    pronounceWords: true,
     isMuted: false,
     setup: {
       players: [],
@@ -456,7 +458,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentActiveLevelKey = "level1"
   const startGameBtn = document.getElementById("startGameBtn")
   const gameDialog = document.getElementById("game-over-dialog")
-  const muteSoundsToggle = document.getElementById("muteSoundsToggle")
+  const soundFxToggle = document.getElementById("soundFxToggle") || document.getElementById("muteSoundsToggle")
   const resetGameBtn = document.getElementById("resetGameBtn")
   const backToSettingsBtn = document.getElementById("settings-btn")
   const playAgainBtn = document.getElementById("play-again-btn")
@@ -564,7 +566,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function repeatLastPlayedSound() {
-    if (gameState.isMuted) return
+    if (!gameState.pronounceWords) return
     if (isMoveProcessing) return
     if (!lastReadWordText && !lastReadWordAudio) return
 
@@ -1461,6 +1463,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       stealthRotatingStarters: gameState.stealthRotatingStarters,
       stealthEqualRounds: gameState.stealthEqualRounds,
       selectedUnits: gameState.selectedUnits,
+      soundFx: gameState.soundFx,
       pronounceWords: gameState.pronounceWords,
       isMuted: gameState.isMuted,
     }
@@ -2860,7 +2863,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function announceCurrentPlayerTurn() {
-    if (gameState.isMuted || !gameState.players || gameState.players.length === 0) return
+    if (!gameState.pronounceWords || !gameState.players || gameState.players.length === 0) return
 
     const activePlayer = gameState.players[gameState.currentPlayer]
     if (!activePlayer) return
@@ -2908,7 +2911,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       activePlayer.turnAudio.currentTime = 0
       playingTurnAudio = activePlayer.turnAudio
       // Final check before playing
-      if (gameState.isMuted || currentTurnCellClicked || gameState.currentPlayer !== targetPlayerIndex) return
+      if (!gameState.pronounceWords || currentTurnCellClicked || gameState.currentPlayer !== targetPlayerIndex) return
       activePlayer.turnAudio.play().catch((e) => console.error("Error playing turn audio:", e))
       return
     }
@@ -2919,7 +2922,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (audio) {
         activePlayer.turnAudio = audio
         // Final check before playing
-        if (gameState.isMuted || currentTurnCellClicked || gameState.currentPlayer !== targetPlayerIndex) return
+        if (!gameState.pronounceWords || currentTurnCellClicked || gameState.currentPlayer !== targetPlayerIndex) return
         playingTurnAudio = audio
         audio.play().catch((e) => console.error("Error playing turn audio:", e))
         return
@@ -2945,7 +2948,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function playPlayerTurnAudio(playerIndex) {
-    if (gameState.isMuted || playerIndex !== gameState.currentPlayer) return
+    if (!gameState.pronounceWords || playerIndex !== gameState.currentPlayer) return
 
     const player = gameState.players?.[playerIndex]
     const playerName = player?.name || gameState.playerNames?.[playerIndex]
@@ -3013,7 +3016,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function speak(text, isWord = false) {
-    if (gameState.isMuted) return Promise.resolve()
+    if (!gameState.pronounceWords) return Promise.resolve()
     if (text.trim().length <= 1) {
       playSound("click")
       return new Promise((resolve) => setTimeout(resolve, 300))
@@ -3245,7 +3248,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const BLOCK_PITCH_STEPS = [0, 200, 400, 700, 900, 1200, 1400, 1600]
 
   async function playScoreSequentially(times) {
-    if (gameState.isMuted || times <= 0) return Promise.resolve()
+    if (!gameState.soundFx || times <= 0) return Promise.resolve()
 
     const ctx = getAudioContext()
     const buffer = scoreAudioBuffer || (await loadScoreAudioBuffer())
@@ -3320,7 +3323,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function playBlockSequentially(times) {
-    if (gameState.isMuted || times <= 0) return Promise.resolve()
+    if (!gameState.soundFx || times <= 0) return Promise.resolve()
 
     const ctx = getAudioContext()
     const buffer = blockAudioBuffer || (await loadBlockAudioBuffer())
@@ -3393,7 +3396,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function playEliminatedSound() {
-    if (gameState.isMuted) return Promise.resolve()
+    if (!gameState.soundFx) return Promise.resolve()
     const audio = sounds.eliminated
     if (!audio) return Promise.resolve()
     return new Promise((resolve) => {
@@ -3408,7 +3411,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function playSound(soundName) {
-    if (gameState.isMuted) return
+    if (!gameState.soundFx) return
     const audio = sounds[soundName]
     if (audio) {
       audio.currentTime = 0
@@ -3417,7 +3420,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function playSoundSequentially(soundName, times) {
-    if (gameState.isMuted) return
+    if (!gameState.soundFx) return
     if (soundName === "score") {
       return playScoreSequentially(times)
     }
@@ -3887,10 +3890,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function updatePronunciationToggleState() {
-    const isMuted = muteSoundsToggle.checked
-    pronounceWordsToggle.disabled = isMuted
     if (wordVoiceModeSelect) {
-      const isDisabled = isMuted || !pronounceWordsToggle.checked
+      const isDisabled = !pronounceWordsToggle.checked
       wordVoiceModeSelect.disabled = isDisabled
       const fieldGroup = document.getElementById("wordVoiceModeGroup")
       if (fieldGroup) {
@@ -3906,7 +3907,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       playerNames: gameState.setup.players,
       gridSize: gridSizeInput.value,
       matchLength: matchLengthInput.value,
-      muteSounds: muteSoundsToggle.checked,
+      soundFx: soundFxToggle.checked,
+      muteSounds: !soundFxToggle.checked,
       pronounceWords: pronounceWordsToggle.checked,
       userSetConquestRotatingStarters,
       userSetStealthRotatingStarters,
@@ -4014,8 +4016,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else {
         matchLengthInput.value = settings.matchLength || 3
       }
-      muteSoundsToggle.checked = settings.muteSounds === true
-      pronounceWordsToggle.checked = settings.pronounceWords === true
+      if (settings.soundFx !== undefined) {
+        soundFxToggle.checked = settings.soundFx === true
+      } else if (settings.muteSounds !== undefined) {
+        soundFxToggle.checked = settings.muteSounds !== true
+      } else {
+        soundFxToggle.checked = true
+      }
+      pronounceWordsToggle.checked = settings.pronounceWords !== false
+      gameState = {
+        ...gameState,
+        soundFx: soundFxToggle.checked,
+        pronounceWords: pronounceWordsToggle.checked,
+        isMuted: !soundFxToggle.checked,
+      }
       userSetConquestRotatingStarters =
         settings.userSetConquestRotatingStarters === true
       userSetStealthRotatingStarters =
@@ -4335,7 +4349,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const shuffledRadii = [...playerRadii].sort(() => 0.5 - Math.random())
       settings.playerRadii = shuffledRadii.slice(0, settings.numPlayers)
 
+      settings.soundFx = soundFxToggle.checked
       settings.pronounceWords = pronounceWordsToggle.checked
+      settings.isMuted = !soundFxToggle.checked
 
       // The initial gameState is built entirely from the setup screen settings.
       gameState = { ...gameState, ...settings }
@@ -5424,8 +5440,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     gridSizeInput.value = 3
     matchLengthInput.value = 3
-    muteSoundsToggle.checked = false
+    soundFxToggle.checked = true
     pronounceWordsToggle.checked = true
+    gameState = {
+      ...gameState,
+      soundFx: true,
+      pronounceWords: true,
+      isMuted: false,
+    }
     if (survivorRotatingStarterToggle) {
       survivorRotatingStarterToggle.checked = false
     }
@@ -5866,6 +5888,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   startGameBtn.addEventListener("click", () => initGame(true))
   randomizePlayerOrderBtn_setup.addEventListener("click", randomizePlayerOrder)
   pronounceWordsToggle.addEventListener("change", () => {
+    gameState = { ...gameState, pronounceWords: pronounceWordsToggle.checked }
+    if (!pronounceWordsToggle.checked) {
+      stopAllTurnVoices()
+    }
     updateApiFieldVisibility()
     updatePronunciationToggleState()
     saveSettings()
@@ -5877,10 +5903,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.setItem("word_voice_mode", e.target.value)
     })
   }
-  muteSoundsToggle.addEventListener("change", () => {
-    gameState = { ...gameState, isMuted: muteSoundsToggle.checked }
-    if (gameState.isMuted) {
-      stopAllTurnVoices()
+  soundFxToggle.addEventListener("change", () => {
+    gameState = {
+      ...gameState,
+      soundFx: soundFxToggle.checked,
+      isMuted: !soundFxToggle.checked,
     }
     updatePronunciationToggleState()
     saveSettings()
