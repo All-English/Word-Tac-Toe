@@ -2709,11 +2709,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         } catch (e) {}
         player.turnAudio = null
       }
+      player.preloadedTurnAudios = null
     })
   }
 
+  function getPlayerTurnAudioUrls(playerName) {
+    if (typeof window !== "undefined" && window.SharedClassSync?.getPlayerTurnAudioUrls) {
+      return window.SharedClassSync.getPlayerTurnAudioUrls(playerName);
+    }
+    const clean = String(playerName || "").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_");
+    if (!clean) return [];
+    return [
+      `https://all-english-media.allenglish.link/audio/players/${clean}_v1.mp3`,
+      `https://all-english-media.allenglish.link/audio/players/${clean}_v2.mp3`,
+      `https://all-english-media.allenglish.link/audio/players/${clean}_v3.mp3`
+    ];
+  }
+
   async function precachePlayerTurnAudios() {
-    if (!userApiKey || !gameState.players || gameState.players.length === 0) return
+    if (!gameState.players || gameState.players.length === 0) return
+
+    // 1. Preload pre-recorded CDN audio variations for all players
+    for (const player of gameState.players) {
+      if (!player.preloadedTurnAudios) {
+        player.preloadedTurnAudios = []
+        const urls = getPlayerTurnAudioUrls(player.name)
+        urls.forEach((url) => {
+          try {
+            const a = new Audio()
+            a.preload = "auto"
+            a.src = url
+            player.preloadedTurnAudios.push(a)
+          } catch (e) {}
+        })
+      }
+    }
+
+    // 2. Fallback: Dynamic ElevenLabs caching if API key configured
+    if (!userApiKey) return
 
     for (const player of gameState.players) {
       if (player.turnAudio) continue
@@ -2726,7 +2759,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function announceCurrentPlayerTurn() {
-    if (gameState.isMuted || !userApiKey || !gameState.players || gameState.players.length === 0) return
+    if (gameState.isMuted || !gameState.players || gameState.players.length === 0) return
 
     const activePlayer = gameState.players[gameState.currentPlayer]
     if (!activePlayer) return
@@ -2736,6 +2769,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     // If player clicked a cell before the announcement is made, skip it
     if (currentTurnCellClicked) return
 
+    stopAllTurnVoices()
+
+    // 1. Try pre-recorded CDN audio variation first (randomly choose 1 of 3 variations)
+    if (!activePlayer.preloadedTurnAudios) {
+      activePlayer.preloadedTurnAudios = []
+      const urls = getPlayerTurnAudioUrls(activePlayer.name)
+      urls.forEach((url) => {
+        try {
+          const a = new Audio()
+          a.preload = "auto"
+          a.src = url
+          activePlayer.preloadedTurnAudios.push(a)
+        } catch (e) {}
+      })
+    }
+
+    if (activePlayer.preloadedTurnAudios && activePlayer.preloadedTurnAudios.length > 0) {
+      const candidateAudio = activePlayer.preloadedTurnAudios[Math.floor(Math.random() * activePlayer.preloadedTurnAudios.length)]
+      if (candidateAudio) {
+        candidateAudio.currentTime = 0
+        playingTurnAudio = candidateAudio
+
+        try {
+          if (currentTurnCellClicked || gameState.currentPlayer !== targetPlayerIndex) return
+          await candidateAudio.play()
+          return
+        } catch (e) {
+          // Fall back gracefully if CDN audio is unreachable or not yet downloaded
+          console.debug("Pre-recorded audio playback fallback:", e.message)
+        }
+      }
+    }
+
+    // 2. Fallback: cached dynamic ElevenLabs audio
     if (activePlayer.turnAudio) {
       activePlayer.turnAudio.currentTime = 0
       playingTurnAudio = activePlayer.turnAudio
@@ -2745,14 +2812,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       return
     }
 
-    const audio = await fetchElevenLabsAudio(`${activePlayer.name}'s turn`, activePlayer.voiceId)
-    if (audio) {
-      activePlayer.turnAudio = audio
-      // Final check before playing
-      if (gameState.isMuted || currentTurnCellClicked || gameState.currentPlayer !== targetPlayerIndex) return
-      playingTurnAudio = audio
-      audio.play().catch((e) => console.error("Error playing turn audio:", e))
+    // 3. Fallback: dynamic ElevenLabs generation if key configured
+    if (userApiKey) {
+      const audio = await fetchElevenLabsAudio(`${activePlayer.name}'s turn`, activePlayer.voiceId)
+      if (audio) {
+        activePlayer.turnAudio = audio
+        // Final check before playing
+        if (gameState.isMuted || currentTurnCellClicked || gameState.currentPlayer !== targetPlayerIndex) return
+        playingTurnAudio = audio
+        audio.play().catch((e) => console.error("Error playing turn audio:", e))
+        return
+      }
     }
+
+    // 4. Final Fallback: Web Speech API / TTS
+    speak(`${activePlayer.name}'s turn`)
   }
 
   function announceCurrentPlayerTurnWithDelay(delay) {
@@ -2782,6 +2856,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       pendingTurnAnnouncementTimeout = null
     }
 
+    // 1. Try pre-recorded CDN audio variation first (random 1 of 3)
+    if (player) {
+      if (!player.preloadedTurnAudios) {
+        player.preloadedTurnAudios = []
+        const urls = getPlayerTurnAudioUrls(playerName)
+        urls.forEach((url) => {
+          try {
+            const a = new Audio()
+            a.preload = "auto"
+            a.src = url
+            player.preloadedTurnAudios.push(a)
+          } catch (e) {}
+        })
+      }
+
+      if (player.preloadedTurnAudios && player.preloadedTurnAudios.length > 0) {
+        const candidateAudio = player.preloadedTurnAudios[Math.floor(Math.random() * player.preloadedTurnAudios.length)]
+        if (candidateAudio) {
+          candidateAudio.currentTime = 0
+          playingTurnAudio = candidateAudio
+
+          try {
+            await candidateAudio.play()
+            return
+          } catch (e) {
+            console.debug("Pre-recorded audio playback fallback:", e.message)
+          }
+        }
+      }
+    }
+
+    // 2. Fallback: cached dynamic ElevenLabs audio
     if (player && player.turnAudio) {
       player.turnAudio.currentTime = 0
       playingTurnAudio = player.turnAudio
@@ -2789,6 +2895,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return
     }
 
+    // 3. Fallback: dynamic ElevenLabs generation if key configured
     if (userApiKey && player && player.voiceId) {
       const audio = await fetchElevenLabsAudio(`${playerName}'s turn`, player.voiceId)
       if (audio) {
@@ -2800,6 +2907,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
+    // 4. Final Fallback: Web Speech API / TTS
     speak(`${playerName}'s turn`)
   }
 
