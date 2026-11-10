@@ -3809,6 +3809,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   function updatePronunciationToggleState() {
     const isMuted = muteSoundsToggle.checked
     pronounceWordsToggle.disabled = isMuted
+    if (wordVoiceModeSelect) {
+      const isDisabled = isMuted || !pronounceWordsToggle.checked
+      wordVoiceModeSelect.disabled = isDisabled
+      const fieldGroup = document.getElementById("wordVoiceModeGroup")
+      if (fieldGroup) {
+        fieldGroup.classList.toggle("disabled", isDisabled)
+      }
+    }
   }
 
   function saveSettings(options = {}) {
@@ -5761,6 +5769,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   randomizePlayerOrderBtn_setup.addEventListener("click", randomizePlayerOrder)
   pronounceWordsToggle.addEventListener("change", () => {
     updateApiFieldVisibility()
+    updatePronunciationToggleState()
     saveSettings()
   })
   if (wordVoiceModeSelect) {

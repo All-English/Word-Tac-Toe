@@ -1409,6 +1409,25 @@ dialog#game-over-dialog {
   justify-content: space-between;
 }
 
+.audio-settings .word-voice-field {
+  width: 100%;
+  max-width: 280px;
+  margin-top: var(--size-2);
+}
+
+.audio-settings .word-voice-field select {
+  cursor: pointer;
+  padding-inline-end: 2.25rem !important;
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audio-settings .word-voice-field.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .tooltip-group {
   display: inline-flex;
   align-items: center;
