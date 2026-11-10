@@ -1412,13 +1412,17 @@ dialog#game-over-dialog {
 .audio-settings .word-voice-field {
   width: 100%;
   max-width: 280px;
-  margin-top: var(--size-2);
+  margin-top: var(--size-3);
 }
 
 .audio-settings .word-voice-field select {
   cursor: pointer;
+  padding-block: 0.35rem !important;
+  padding-inline-start: var(--size-2, 0.5rem) !important;
   padding-inline-end: 2.25rem !important;
+  height: 42px !important;
   font-size: 0.85rem;
+  line-height: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
