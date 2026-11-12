@@ -44,6 +44,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     eliminated: new Audio("sounds/eliminated.mp3"),
   }
 
+  // Preload sound effects immediately
+  Object.values(sounds).forEach((audio) => {
+    try {
+      audio.preload = "auto"
+      audio.load()
+    } catch (e) {}
+  })
+
   // --- WEB AUDIO API (For pitch-shifted score sounds and timed block sounds) ---
   let webAudioCtx = null
   let scoreAudioBuffer = null
@@ -105,6 +113,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     getAudioContext()
     loadScoreAudioBuffer()
     loadBlockAudioBuffer()
+    Object.values(sounds).forEach((audio) => {
+      try {
+        if (audio.readyState < 2) audio.load()
+      } catch (e) {}
+    })
     window.removeEventListener("pointerdown", unlockAudioContext)
     window.removeEventListener("keydown", unlockAudioContext)
   }
@@ -2798,6 +2811,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
   }
 
+  const playerTurnAudioCache = new Map();
+  const boardWordAudioCache = new Map();
+
   function getPlayerTurnAudioUrls(playerName) {
     if (typeof window !== "undefined" && window.SharedClassSync?.getPlayerTurnAudioUrls) {
       return window.SharedClassSync.getPlayerTurnAudioUrls(playerName);
@@ -2812,51 +2828,81 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function precachePlayerTurnAudios() {
-    if (!gameState.players || gameState.players.length === 0) return
+    const names = [];
+    if (gameState.players && gameState.players.length > 0) {
+      gameState.players.forEach((p) => { if (p?.name) names.push(p.name); });
+    } else if (gameState.setup?.players && gameState.setup.players.length > 0) {
+      gameState.setup.players.forEach((p) => {
+        const n = typeof p === "string" ? p : p?.name;
+        if (n) names.push(n);
+      });
+    }
 
-    // 1. Preload pre-recorded CDN audio variations for all players
-    for (const player of gameState.players) {
-      if (!player.preloadedTurnAudios) {
-        player.preloadedTurnAudios = []
-        const urls = getPlayerTurnAudioUrls(player.name)
+    if (names.length === 0) return;
+
+    // 1. Preload pre-recorded CDN audio variations for all players into memory cache
+    for (const name of names) {
+      const clean = String(name || "").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_");
+      if (!clean) continue;
+
+      let cachedAudios = playerTurnAudioCache.get(clean);
+      if (!cachedAudios) {
+        cachedAudios = [];
+        const urls = getPlayerTurnAudioUrls(name);
         urls.forEach((url) => {
           try {
-            const a = new Audio()
-            a.preload = "auto"
-            a.src = url
-            player.preloadedTurnAudios.push(a)
+            const a = new Audio();
+            a.preload = "auto";
+            a.src = url;
+            a.load();
+            cachedAudios.push(a);
           } catch (e) {}
-        })
+        });
+        playerTurnAudioCache.set(clean, cachedAudios);
       }
     }
 
-    // 2. Fallback: Dynamic ElevenLabs caching if API key configured
-    if (!userApiKey) return
+    // 2. Attach preloaded turn audios to active game players
+    if (gameState.players && gameState.players.length > 0) {
+      for (const player of gameState.players) {
+        const clean = String(player.name || "").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_");
+        if (playerTurnAudioCache.has(clean)) {
+          player.preloadedTurnAudios = playerTurnAudioCache.get(clean);
+        }
+      }
+    }
+
+    // 3. Fallback: Dynamic ElevenLabs caching if API key configured and in active game
+    if (!userApiKey || !gameState.players) return;
 
     for (const player of gameState.players) {
-      if (player.turnAudio) continue
+      if (player.turnAudio) continue;
 
-      const audio = await fetchElevenLabsAudio(`${player.name}'s turn`, player.voiceId)
+      const audio = await fetchElevenLabsAudio(`${player.name}'s turn`, player.voiceId);
       if (audio) {
-        player.turnAudio = audio
+        player.turnAudio = audio;
       }
     }
   }
 
   function precacheBoardWordAudios() {
-    if (!gameState.board || !Array.isArray(gameState.board)) return
-    const mode = (wordVoiceModeSelect?.value || localStorage.getItem("word_voice_mode") || "mixed").toLowerCase()
+    if (!gameState.board || !Array.isArray(gameState.board)) return;
+    const mode = (wordVoiceModeSelect?.value || localStorage.getItem("word_voice_mode") || "mixed").toLowerCase();
     if (typeof window !== "undefined" && window.SharedClassSync?.getWordAudioUrls) {
-      const words = [...new Set(gameState.board.map((cell) => (typeof cell === "string" ? cell : cell?.word || "")).filter(Boolean))]
+      const words = [...new Set(gameState.board.map((cell) => (typeof cell === "string" ? cell : cell?.word || "")).filter(Boolean))];
       for (const word of words) {
-        if (word.length <= 1) continue
-        const urls = window.SharedClassSync.getWordAudioUrls(word, { mode })
+        if (word.length <= 1) continue;
+        const urls = window.SharedClassSync.getWordAudioUrls(word, { mode });
         for (const url of urls) {
-          try {
-            const a = new Audio()
-            a.preload = "auto"
-            a.src = url
-          } catch (e) {}
+          if (!boardWordAudioCache.has(url)) {
+            try {
+              const a = new Audio();
+              a.preload = "auto";
+              a.src = url;
+              a.load();
+              boardWordAudioCache.set(url, a);
+            } catch (e) {}
+          }
         }
       }
     }
@@ -2875,7 +2921,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     stopAllTurnVoices()
 
-    // 1. Try pre-recorded CDN audio variation first (randomly choose 1 of 3 variations)
+    // 1. Try pre-recorded CDN audio variation first (randomly choose 1 of available variations)
+    const clean = String(activePlayer.name || "").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_");
+    if (!activePlayer.preloadedTurnAudios && playerTurnAudioCache.has(clean)) {
+      activePlayer.preloadedTurnAudios = playerTurnAudioCache.get(clean);
+    }
     if (!activePlayer.preloadedTurnAudios) {
       activePlayer.preloadedTurnAudios = []
       const urls = getPlayerTurnAudioUrls(activePlayer.name)
@@ -2884,9 +2934,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           const a = new Audio()
           a.preload = "auto"
           a.src = url
+          a.load()
           activePlayer.preloadedTurnAudios.push(a)
         } catch (e) {}
       })
+      if (clean) playerTurnAudioCache.set(clean, activePlayer.preloadedTurnAudios);
     }
 
     if (activePlayer.preloadedTurnAudios && activePlayer.preloadedTurnAudios.length > 0) {
@@ -2960,8 +3012,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       pendingTurnAnnouncementTimeout = null
     }
 
-    // 1. Try pre-recorded CDN audio variation first (random 1 of 3)
+    // 1. Try pre-recorded CDN audio variation first (random 1 of available variations)
     if (player) {
+      const clean = String(playerName || "").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_");
+      if (!player.preloadedTurnAudios && playerTurnAudioCache.has(clean)) {
+        player.preloadedTurnAudios = playerTurnAudioCache.get(clean);
+      }
       if (!player.preloadedTurnAudios) {
         player.preloadedTurnAudios = []
         const urls = getPlayerTurnAudioUrls(playerName)
@@ -2970,9 +3026,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             const a = new Audio()
             a.preload = "auto"
             a.src = url
+            a.load()
             player.preloadedTurnAudios.push(a)
           } catch (e) {}
         })
+        if (clean) playerTurnAudioCache.set(clean, player.preloadedTurnAudios);
       }
 
       if (player.preloadedTurnAudios && player.preloadedTurnAudios.length > 0) {
@@ -3040,8 +3098,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (chosenUrl) {
           lastPlayedWordUrl = chosenUrl
           try {
-            const audio = new Audio(chosenUrl)
-            audio.preload = "auto"
+            let audio = boardWordAudioCache.get(chosenUrl)
+            if (!audio) {
+              audio = new Audio(chosenUrl)
+              audio.preload = "auto"
+              audio.load()
+              boardWordAudioCache.set(chosenUrl, audio)
+            } else {
+              audio.currentTime = 0
+            }
 
             if (lastReadWordAudio && lastReadWordAudio.src && lastReadWordAudio.src.startsWith("blob:")) {
               try {
@@ -3052,11 +3117,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             lastReadWordText = text.trim()
 
             await new Promise((resolve) => {
-              audio.onended = () => resolve()
-              audio.onerror = () => resolve()
+              const cleanup = () => {
+                audio.onended = null
+                audio.onerror = null
+                resolve()
+              }
+              audio.onended = cleanup
+              audio.onerror = cleanup
               audio.play().catch((e) => {
                 console.error(`Could not play word audio: ${e}`)
-                resolve()
+                cleanup()
               })
             })
             return
@@ -4764,6 +4834,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         saveSettings()
         validatePlayerNames()
       })
+      input.addEventListener("change", () => {
+        precachePlayerTurnAudios()
+      })
 
       field.appendChild(label)
       field.appendChild(input)
@@ -4809,6 +4882,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       playerNamesContainer.appendChild(wrapper)
     })
     updatePlayerButtonsState()
+    precachePlayerTurnAudios()
   }
 
   function getPrimarySeriesFromUnits(canonicalUnits, profileCurriculumId = null) {
