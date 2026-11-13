@@ -2799,20 +2799,96 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function resetCachedTurnVoices() {
-    if (!gameState.players) return
-    gameState.players.forEach((player) => {
-      if (player.turnAudio) {
-        try {
-          URL.revokeObjectURL(player.turnAudio.src)
-        } catch (e) {}
-        player.turnAudio = null
-      }
-      player.preloadedTurnAudios = null
-    })
+    if (gameState.players) {
+      gameState.players.forEach((player) => {
+        if (player.turnAudio) {
+          try {
+            URL.revokeObjectURL(player.turnAudio.src)
+          } catch (e) {}
+          player.turnAudio = null
+        }
+        player.preloadedTurnAudios = null
+      })
+    }
+    clearDynamicTurnCache()
   }
 
   const playerTurnAudioCache = new Map();
   const boardWordAudioCache = new Map();
+  const dynamicPlayerTurnCache = new Map();
+
+  function getDynamicTurnEntry(playerName) {
+    const key = String(playerName || "").trim().toLowerCase();
+    if (!key) return null;
+    if (!dynamicPlayerTurnCache.has(key)) {
+      dynamicPlayerTurnCache.set(key, {
+        audios: [],
+        usedVoiceIds: [],
+        playedIndices: new Set(),
+        lastPlayedIndex: -1,
+        pendingPromise: null
+      });
+    }
+    return dynamicPlayerTurnCache.get(key);
+  }
+
+  async function generateNextDynamicTurnAudio(playerName, preferredVoiceId = null) {
+    const entry = getDynamicTurnEntry(playerName);
+    if (!entry) return null;
+    if (entry.pendingPromise) return entry.pendingPromise;
+
+    const spec = window.SharedClassSync?.getNextDynamicTurnSpec?.(
+      playerName,
+      entry.usedVoiceIds,
+      entry.audios.length,
+      preferredVoiceId
+    );
+    if (!spec) return null;
+
+    entry.pendingPromise = (async () => {
+      try {
+        const audio = await fetchElevenLabsAudio(spec.text, spec.voiceId);
+        if (audio) {
+          entry.usedVoiceIds.push(spec.voiceId);
+          entry.audios.push(audio);
+          return audio;
+        }
+      } finally {
+        entry.pendingPromise = null;
+      }
+      return null;
+    })();
+
+    return entry.pendingPromise;
+  }
+
+  function pickDynamicTurnAudio(playerName) {
+    const entry = getDynamicTurnEntry(playerName);
+    if (!entry || entry.audios.length === 0) return null;
+    let candidates = entry.audios.map((_, i) => i).filter((i) => !entry.playedIndices.has(i));
+    if (candidates.length === 0) {
+      entry.playedIndices.clear();
+      candidates = entry.audios.map((_, i) => i).filter((i) => i !== entry.lastPlayedIndex);
+      if (candidates.length === 0) candidates = [0];
+    }
+    const chosenIdx = candidates[Math.floor(Math.random() * candidates.length)];
+    entry.playedIndices.add(chosenIdx);
+    entry.lastPlayedIndex = chosenIdx;
+    return entry.audios[chosenIdx];
+  }
+
+  function clearDynamicTurnCache() {
+    for (const entry of dynamicPlayerTurnCache.values()) {
+      for (const audio of entry.audios) {
+        if (audio?.src && audio.src.startsWith("blob:")) {
+          try {
+            URL.revokeObjectURL(audio.src);
+          } catch (e) {}
+        }
+      }
+    }
+    dynamicPlayerTurnCache.clear();
+  }
 
   function getPlayerTurnAudioUrls(playerName) {
     if (typeof window !== "undefined" && window.SharedClassSync?.getPlayerTurnAudioUrls) {
@@ -2823,7 +2899,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     return [
       `https://all-english-media.allenglish.link/audio/players/${clean}_v1.mp3`,
       `https://all-english-media.allenglish.link/audio/players/${clean}_v2.mp3`,
-      `https://all-english-media.allenglish.link/audio/players/${clean}_v3.mp3`
+      `https://all-english-media.allenglish.link/audio/players/${clean}_v3.mp3`,
+      `https://all-english-media.allenglish.link/audio/players/${clean}_v4.mp3`,
+      `https://all-english-media.allenglish.link/audio/players/${clean}_v5.mp3`,
+      `https://all-english-media.allenglish.link/audio/players/${clean}_v6.mp3`
     ];
   }
 
@@ -2876,15 +2955,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // 3. Fallback: Dynamic ElevenLabs caching only for players without pre-recorded CDN audio
+    // 3. Fallback: Lazy-seed variation #1 via ElevenLabs only for players without pre-recorded CDN audio
     if (!userApiKey || !gameState.players) return;
 
     for (const player of gameState.players) {
-      if (player.turnAudio || (player.preloadedTurnAudios && player.preloadedTurnAudios.length > 0)) continue;
-
-      const audio = await fetchElevenLabsAudio(`${player.name}'s turn`, player.voiceId);
-      if (audio) {
-        player.turnAudio = audio;
+      if (player.preloadedTurnAudios && player.preloadedTurnAudios.length > 0) continue;
+      const entry = getDynamicTurnEntry(player.name);
+      if (entry && entry.audios.length === 0) {
+        await generateNextDynamicTurnAudio(player.name, player.voiceId);
       }
     }
   }
@@ -2966,31 +3044,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // 2. Fallback: cached dynamic ElevenLabs audio
-    if (activePlayer.turnAudio) {
-      activePlayer.turnAudio.currentTime = 0
-      playingTurnAudio = activePlayer.turnAudio
-      // Final check before playing
+    // 2. Fallback: lazy multi-variation ElevenLabs caching (Option B)
+    const cachedDynamic = pickDynamicTurnAudio(activePlayer.name)
+    if (cachedDynamic) {
+      cachedDynamic.currentTime = 0
+      playingTurnAudio = cachedDynamic
       if (!gameState.pronounceWords || currentTurnCellClicked || gameState.currentPlayer !== targetPlayerIndex) return
-      activePlayer.turnAudio.play().catch((e) => console.error("Error playing turn audio:", e))
+      cachedDynamic.play().catch((e) => console.error("Error playing turn audio:", e))
+      if (userApiKey) {
+        generateNextDynamicTurnAudio(activePlayer.name, activePlayer.voiceId).catch(() => {})
+      }
       return
     }
 
-    // 3. Fallback: dynamic ElevenLabs generation if key configured
+    // 3. Fallback: generate first dynamic ElevenLabs variation on demand if key configured
     if (userApiKey) {
-      const audio = await fetchElevenLabsAudio(`${activePlayer.name}'s turn`, activePlayer.voiceId)
+      const audio = await generateNextDynamicTurnAudio(activePlayer.name, activePlayer.voiceId)
       if (audio) {
-        activePlayer.turnAudio = audio
-        // Final check before playing
+        const entry = getDynamicTurnEntry(activePlayer.name)
+        if (entry && entry.audios.length > 0) {
+          entry.playedIndices.add(0)
+          entry.lastPlayedIndex = 0
+        }
         if (!gameState.pronounceWords || currentTurnCellClicked || gameState.currentPlayer !== targetPlayerIndex) return
         playingTurnAudio = audio
         audio.play().catch((e) => console.error("Error playing turn audio:", e))
+        generateNextDynamicTurnAudio(activePlayer.name, activePlayer.voiceId).catch(() => {})
         return
       }
     }
 
     // 4. Final Fallback: Web Speech API / TTS
-    speak(`${activePlayer.name}'s turn`)
+    speak(window.SharedClassSync?.getRandomTurnPhrase?.(activePlayer.name) || `${activePlayer.name}'s turn`)
   }
 
   function announceCurrentPlayerTurnWithDelay(delay) {
@@ -3057,28 +3142,37 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // 2. Fallback: cached dynamic ElevenLabs audio
-    if (player && player.turnAudio) {
-      player.turnAudio.currentTime = 0
-      playingTurnAudio = player.turnAudio
-      player.turnAudio.play().catch((e) => console.error("Error playing turn audio:", e))
+    // 2. Fallback: lazy multi-variation ElevenLabs caching (Option B)
+    const cachedDynamic = pickDynamicTurnAudio(playerName)
+    if (cachedDynamic) {
+      cachedDynamic.currentTime = 0
+      playingTurnAudio = cachedDynamic
+      cachedDynamic.play().catch((e) => console.error("Error playing turn audio:", e))
+      if (userApiKey) {
+        generateNextDynamicTurnAudio(playerName, player?.voiceId).catch(() => {})
+      }
       return
     }
 
-    // 3. Fallback: dynamic ElevenLabs generation if key configured
-    if (userApiKey && player && player.voiceId) {
-      const audio = await fetchElevenLabsAudio(`${playerName}'s turn`, player.voiceId)
+    // 3. Fallback: generate first dynamic ElevenLabs variation on demand if key configured
+    if (userApiKey) {
+      const audio = await generateNextDynamicTurnAudio(playerName, player?.voiceId)
       if (audio) {
-        player.turnAudio = audio
+        const entry = getDynamicTurnEntry(playerName)
+        if (entry && entry.audios.length > 0) {
+          entry.playedIndices.add(0)
+          entry.lastPlayedIndex = 0
+        }
         stopAllTurnVoices()
         playingTurnAudio = audio
         audio.play().catch((e) => console.error("Error playing turn audio:", e))
+        generateNextDynamicTurnAudio(playerName, player?.voiceId).catch(() => {})
         return
       }
     }
 
     // 4. Final Fallback: Web Speech API / TTS
-    speak(`${playerName}'s turn`)
+    speak(window.SharedClassSync?.getRandomTurnPhrase?.(playerName) || `${playerName}'s turn`)
   }
 
   async function speak(text, isWord = false) {
