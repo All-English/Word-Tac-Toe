@@ -2872,11 +2872,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // 3. Fallback: Dynamic ElevenLabs caching if API key configured and in active game
+    // 3. Fallback: Dynamic ElevenLabs caching only for players without pre-recorded CDN audio
     if (!userApiKey || !gameState.players) return;
 
     for (const player of gameState.players) {
-      if (player.turnAudio) continue;
+      if (player.turnAudio || (player.preloadedTurnAudios && player.preloadedTurnAudios.length > 0)) continue;
 
       const audio = await fetchElevenLabsAudio(`${player.name}'s turn`, player.voiceId);
       if (audio) {
@@ -3116,20 +3116,23 @@ document.addEventListener("DOMContentLoaded", async () => {
             lastReadWordAudio = audio
             lastReadWordText = text.trim()
 
-            await new Promise((resolve) => {
-              const cleanup = () => {
+            const played = await new Promise((resolve) => {
+              let settled = false
+              const cleanup = (success = true) => {
+                if (settled) return
+                settled = true
                 audio.onended = null
                 audio.onerror = null
-                resolve()
+                resolve(success)
               }
-              audio.onended = cleanup
-              audio.onerror = cleanup
+              audio.onended = () => cleanup(true)
+              audio.onerror = () => cleanup(false)
               audio.play().catch((e) => {
                 console.error(`Could not play word audio: ${e}`)
-                cleanup()
+                cleanup(false)
               })
             })
-            return
+            if (played) return
           } catch (e) {
             console.debug("Pre-downloaded word audio playback failed:", e)
           }
