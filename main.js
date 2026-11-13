@@ -2828,6 +2828,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function precachePlayerTurnAudios() {
+    try {
+      await window.SharedClassSync?.loadPlayerAudioManifest?.();
+    } catch (e) {}
+
     const names = [];
     if (gameState.players && gameState.players.length > 0) {
       gameState.players.forEach((p) => { if (p?.name) names.push(p.name); });
@@ -2845,10 +2849,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const clean = String(name || "").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_");
       if (!clean) continue;
 
+      const urls = getPlayerTurnAudioUrls(name);
       let cachedAudios = playerTurnAudioCache.get(clean);
-      if (!cachedAudios) {
+      if (!cachedAudios || (urls.length > 0 && cachedAudios.length !== urls.length)) {
         cachedAudios = [];
-        const urls = getPlayerTurnAudioUrls(name);
         urls.forEach((url) => {
           try {
             const a = new Audio();
@@ -2885,7 +2889,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function precacheBoardWordAudios() {
+  async function precacheBoardWordAudios() {
+    if (!gameState.board || !Array.isArray(gameState.board)) return;
+    try {
+      await window.SharedClassSync?.loadWordAudioManifest?.();
+    } catch (e) {}
     if (!gameState.board || !Array.isArray(gameState.board)) return;
     const mode = (wordVoiceModeSelect?.value || localStorage.getItem("word_voice_mode") || "mixed").toLowerCase();
     if (typeof window !== "undefined" && window.SharedClassSync?.getWordAudioUrls) {
