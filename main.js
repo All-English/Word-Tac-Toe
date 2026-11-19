@@ -188,7 +188,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ElevenLabs Pronunciation Dictionary (Korean Player Names)
   const ELEVENLABS_PRONUNCIATION_DICT_ID = "sKcMTMc7IZdOIqGSuKGL"
-  const ELEVENLABS_PRONUNCIATION_VERSION_ID = "mP7aeKcxpImcYdvw1JQt"
+  const ELEVENLABS_PRONUNCIATION_VERSION_ID = "3mTzTQzzgwh88Eo3YcRd"
 
   function clearApiKeyCookiesAndStorage() {
     localStorage.removeItem("elevenlabs_api_key")

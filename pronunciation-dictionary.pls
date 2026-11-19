@@ -91,23 +91,23 @@
 
   <lexeme>
     <grapheme>도윤</grapheme>
-    <alias>Do-yoon</alias>
+    <alias>Doe-yoon</alias>
   </lexeme>
   <lexeme>
     <grapheme>Doyun</grapheme>
-    <alias>Do-yoon</alias>
+    <alias>Doe-yoon</alias>
   </lexeme>
   <lexeme>
     <grapheme>doyun</grapheme>
-    <alias>Do-yoon</alias>
+    <alias>Doe-yoon</alias>
   </lexeme>
   <lexeme>
     <grapheme>Doyoon</grapheme>
-    <alias>Do-yoon</alias>
+    <alias>Doe-yoon</alias>
   </lexeme>
   <lexeme>
     <grapheme>doyoon</grapheme>
-    <alias>Do-yoon</alias>
+    <alias>Doe-yoon</alias>
   </lexeme>
 
   <!-- Geonwoo (건우) -->
