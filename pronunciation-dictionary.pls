@@ -91,23 +91,23 @@
 
   <lexeme>
     <grapheme>도윤</grapheme>
-    <phoneme>/to̞.jun/</phoneme>
+    <alias>Do-yoon</alias>
   </lexeme>
   <lexeme>
     <grapheme>Doyun</grapheme>
-    <phoneme>/to̞.jun/</phoneme>
+    <alias>Do-yoon</alias>
   </lexeme>
   <lexeme>
     <grapheme>doyun</grapheme>
-    <phoneme>/to̞.jun/</phoneme>
+    <alias>Do-yoon</alias>
   </lexeme>
   <lexeme>
     <grapheme>Doyoon</grapheme>
-    <phoneme>/to̞.jun/</phoneme>
+    <alias>Do-yoon</alias>
   </lexeme>
   <lexeme>
     <grapheme>doyoon</grapheme>
-    <phoneme>/to̞.jun/</phoneme>
+    <alias>Do-yoon</alias>
   </lexeme>
 
   <!-- Geonwoo (건우) -->
@@ -165,23 +165,23 @@
   <!-- Hanyul (한율) -->
   <lexeme>
     <grapheme>한율</grapheme>
-    <phoneme>/ha̠n.jul/</phoneme>
+    <alias>Han-yul</alias>
   </lexeme>
   <lexeme>
     <grapheme>Hanyul</grapheme>
-    <phoneme>/ha̠n.jul/</phoneme>
+    <alias>Han-yul</alias>
   </lexeme>
   <lexeme>
     <grapheme>hanyul</grapheme>
-    <phoneme>/ha̠n.jul/</phoneme>
+    <alias>Han-yul</alias>
   </lexeme>
   <lexeme>
     <grapheme>Hanyool</grapheme>
-    <phoneme>/ha̠n.jul/</phoneme>
+    <alias>Han-yul</alias>
   </lexeme>
   <lexeme>
     <grapheme>hanyool</grapheme>
-    <phoneme>/ha̠n.jul/</phoneme>
+    <alias>Han-yul</alias>
   </lexeme>
 
   <!-- 준이 (Juni / Jooni) -->
