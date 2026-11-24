@@ -415,7 +415,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             latestActiveUnits &&
             Array.isArray(latestActiveUnits.units) &&
             latestActiveUnits.units.length > 0 &&
-            (latestActiveUnits.updatedAt || 0) >= candidateTime
+            (latestActiveUnits.updatedAt || 0) > candidateTime &&
+            (
+              !activeSession?.className ||
+              latestActiveUnits.className === activeSession.className ||
+              (
+                !latestActiveUnits.className &&
+                window.SharedClassSync.isTimestampInCurrentClassSession?.(latestActiveUnits.updatedAt, activeSession.className, sessionProf)
+              )
+            )
           ) {
             candidateUnits = latestActiveUnits.units
             candidateCurId = latestActiveUnits.curriculumId || candidateCurId || "smart-phonics"
@@ -4076,6 +4084,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function saveSettings(options = {}) {
+    let prevUpdatedAt = 0
+    try {
+      const prev = JSON.parse(localStorage.getItem("phonics_game_settings") || "{}")
+      prevUpdatedAt = prev.updatedAt || 0
+    } catch {}
+    const nextUpdatedAt = options.preserveUpdatedAt !== undefined
+      ? options.preserveUpdatedAt
+      : (options.syncUnits ? Date.now() : prevUpdatedAt)
+
     const isTwoPlayers = gameState.setup.players.length <= 2
     const settingsToSave = {
       numPlayers: gameState.setup.players.length,
@@ -4122,7 +4139,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       activeLevelKey: currentActiveLevelKey,
       darkMode: darkModeToggle.checked,
       themeHue: themeHueSelect.value,
-      updatedAt: options.preserveUpdatedAt || Date.now(),
+      updatedAt: nextUpdatedAt,
     }
 
     localStorage.setItem(
@@ -4137,7 +4154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     saveActiveSessionPlayers(activeNames)
 
     // Auto-sync units to active class profile & shared active units in SharedClassSync
-    if (typeof window.SharedClassSync !== "undefined") {
+    if (options.syncUnits && typeof window.SharedClassSync !== "undefined") {
       const canonicals = settingsToSave.selectedUnits
         .map((s) => window.SharedClassSync.toCanonicalUnit(s)?.id)
         .filter(Boolean)
@@ -5347,7 +5364,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderLevelTabs()
     renderActiveLevelToolbar()
     renderUnitChipsGrid()
-    saveSettings()
+    saveSettings({ syncUnits: true })
     syncUrlParameters()
   }
 
@@ -5378,7 +5395,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderLevelTabs()
     renderActiveLevelToolbar()
     renderUnitChipsGrid()
-    saveSettings()
+    saveSettings({ syncUnits: true })
     syncUrlParameters()
   }
 
@@ -5923,7 +5940,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       profiles[setName] = {
         schedule: sched,
-        units: canonicals,
+        units: canonicals.length > 0 ? canonicals : (profiles[setName]?.units || []),
         curriculumId: activeSeriesId,
         updatedAt: Date.now()
       }
@@ -5986,6 +6003,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         let unitsToApply = (prof && Array.isArray(prof.units) && prof.units.length > 0) ? prof.units : null
         let curIdToApply = prof?.curriculumId || null
         chosenUpdatedAt = prof?.updatedAt || 0
+        let adoptedFromActiveUnits = false
 
         // If another app updated units for this class (or during this class's current session window) more recently than the class profile, adopt them
         if (
@@ -6004,18 +6022,23 @@ document.addEventListener("DOMContentLoaded", async () => {
           unitsToApply = latestActiveUnits.units
           curIdToApply = latestActiveUnits.curriculumId || curIdToApply
           chosenUpdatedAt = latestActiveUnits.updatedAt || Date.now()
+          adoptedFromActiveUnits = true
         }
 
         if (unitsToApply && unitsToApply.length > 0) {
           applyUnitsToTicTacToe(unitsToApply, curIdToApply)
-          if (setName && window.SharedClassSync?.saveClassUnits) {
+          if (adoptedFromActiveUnits && chosenUpdatedAt > 0 && setName && window.SharedClassSync?.saveClassUnits) {
             const canonicals = unitsToApply
               .map((s) => window.SharedClassSync.toCanonicalUnit(s)?.id)
               .filter(Boolean)
             if (canonicals.length > 0) {
-              window.SharedClassSync.saveClassUnits(setName, canonicals, activeSeriesId, chosenUpdatedAt)
+              window.SharedClassSync.saveClassUnits(setName, canonicals, curIdToApply || activeSeriesId, chosenUpdatedAt)
             }
           }
+        } else {
+          selectedUnitKeys.clear()
+          renderWordSelectionUI()
+          syncUrlParameters()
         }
       } catch (e) {
         console.warn("Error applying units for loaded set:", e)
@@ -6026,7 +6049,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       playerSetsDialog.close()
     }
     validatePlayerNames()
-    saveSettings({ skipSharedSync: true, preserveUpdatedAt: chosenUpdatedAt || Date.now() })
+    saveSettings({ skipSharedSync: true, preserveUpdatedAt: chosenUpdatedAt })
   }
 
   function handleDeleteSet(setName) {
