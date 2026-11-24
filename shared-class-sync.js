@@ -3550,6 +3550,7 @@
 
     if (!cachedOfficialWordAudioMap) {
       cachedOfficialWordAudioMap = new Map();
+      const level1Fallback = new Map();
       const curr = CurriculumLoader.cachedCurriculum || CurriculumLoader.cachedMasterCurriculum;
       if (curr && Array.isArray(curr.series)) {
         const sp = curr.series.find(s => toSeriesSlug(s.id) === 'smart-phonics') || curr.series[0];
@@ -3559,9 +3560,10 @@
               for (const w of (u.words || [])) {
                 if (!w) continue;
                 if (lvl.bookNumber === 1 && w.imageAudio) {
+                  // Level 1 picture-vocab audio is only a fallback; higher-level word audio wins
                   const vocab = String(w.imageAudio).split('/').pop().replace(/\.mp3$/i, '').toLowerCase();
-                  if (vocab && !cachedOfficialWordAudioMap.has(vocab)) {
-                    cachedOfficialWordAudioMap.set(vocab, w.imageAudio);
+                  if (vocab && !level1Fallback.has(vocab)) {
+                    level1Fallback.set(vocab, w.imageAudio);
                   }
                 } else if (w.word && w.audio) {
                   const wSlug = toWordSlug(w.word);
@@ -3571,6 +3573,9 @@
                 }
               }
             }
+          }
+          for (const [k, v] of level1Fallback) {
+            if (!cachedOfficialWordAudioMap.has(k)) cachedOfficialWordAudioMap.set(k, v);
           }
         }
       }
